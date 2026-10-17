@@ -6,6 +6,7 @@ import fig1 from '@/assets/paper/fig1-unified-model.webp';
 import { Section, Prose, WithMargin } from '@/components/ui/Section';
 import { Plate } from '@/components/ui/Plate';
 import { RouterLoop } from '@/components/viz/RouterLoop';
+import { ExecutionPlans } from '@/components/viz/ExecutionPlans';
 import { Sym } from '@/components/math/Sym';
 import { M } from '@/components/math/M';
 import { paper } from '@/data/paper';
@@ -130,6 +131,31 @@ export function Problem() {
                 </motion.figure>
               )}
             </AnimatePresence>
+          </Plate>
+        </div>
+
+        <Prose className="mt-16">
+          <p>
+            An <em>action</em> is a choice of models or tools together with an execution rule. The paper studies three rules:{' '}
+            <strong>direct dispatch</strong> commits to one output before seeing it; a <strong>verified cascade</strong> tries a cheap
+            primary and escalates to the reference only when a verifier rejects the answer; a <strong>portfolio</strong> calls several
+            capabilities and keeps the best passing answer. Each changes which tasks reach the later stages, and what every task costs.
+          </p>
+        </Prose>
+        <div className="mt-10 md:ml-[190px]">
+          <Plate
+            fig="2"
+            title="Three ways to execute a plan"
+            source={{ kind: 'schematic', note: 'after the paper’s Fig. 1b' }}
+            caption={
+              <>
+                Each moving segment is one task. A direct call commits up front; a cascade pays the primary on every task and the reference
+                only on the rejected ones (here the verifier accepts about three in five); a portfolio pays every member call and keeps the
+                selected answer, falling back to <M>{'B'}</M> when none passes. Switch tabs to watch the plan re-route.
+              </>
+            }
+          >
+            <ExecutionPlans />
           </Plate>
         </div>
       </div>

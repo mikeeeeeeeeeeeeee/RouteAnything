@@ -2,21 +2,24 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import RubberSegment from '@/components/reactbits/RubberSegment/RubberSegment';
 import Counter from '@/components/reactbits/Counter/Counter';
 import { useClock, useInView, useReducedMotion } from '@/lib/hooks';
+import { bend, hash01, length, trim, type Pt } from '@/lib/polyline';
 import { tex } from '@/lib/tex';
 import { useTokens } from '@/theme/tokens';
-import { TexLabel, mono, sans } from './svg';
+import { FigTag, FlowEdge, FlowNode, Packet, type Tone } from './flow';
+import { mono } from './svg';
 
 // Eq. (5) acted out. Every task pays the primary's cost A; a rejected one also pays C_B and gets the
 // reference's answer. V - Y_B = H (Y_P - Y_B), so quality is lost only through false accepts.
 // Illustration: the reference is right on every task, the primary on 45%, A = 0.1 C_B.
 
-type Pt = [number, number];
-const VW = 760;
-const VH = 300;
+const VW = 840;
+const VH = 330;
+const R = 40;
 const P_RIGHT = 0.45;
 const A = 0.1;
 const INTERVAL = 0.42;
-const TRAVEL = 2.6;
+const LEG = 0.62;
+const TRAVEL = LEG * 3 + 0.2;
 
 const VERIFIERS = {
   lenient: { tpr: 0.97, fpr: 0.35, label: 'Lenient' },
@@ -25,36 +28,25 @@ const VERIFIERS = {
 } as const;
 type VKey = keyof typeof VERIFIERS;
 
-// deterministic hash -> [0, 1)
-const rnd = (i: number, salt: number) => {
-  let x = (i * 374761393 + salt * 668265263) | 0;
-  x = (x ^ (x >>> 13)) * 1274126177;
-  x = x ^ (x >>> 16);
-  return ((x >>> 0) % 100000) / 100000;
+const rnd = hash01;
+
+type Id = 'tasks' | 'primary' | 'verify' | 'accept' | 'ref';
+const N: Record<Id, { x: number; y: number; label: string; caption: { text?: string; tex?: string; at?: 'below' | 'above' | 'right' | 'left' } }> = {
+  tasks: { x: 86, y: 166, label: 'Tasks', caption: { text: 'one per beat' } },
+  primary: { x: 262, y: 166, label: 'Primary', caption: { text: 'pay', tex: 'A' } },
+  verify: { x: 438, y: 166, label: 'Verify', caption: { tex: 'H_\\theta=\\mathbf 1\\{\\Sigma\\ge\\theta\\}' } },
+  accept: { x: 690, y: 62, label: 'Accept', caption: { text: 'deliver', tex: 'Y_P', at: 'right' } },
+  ref: { x: 690, y: 270, label: 'Reference', caption: { text: 'pay', tex: 'C_B', at: 'right' } },
 };
-
-const IN: Pt = [10, 150];
-const PRIM: [number, number, number, number] = [96, 118, 120, 64];
-const VER: [number, number, number, number] = [292, 118, 112, 64];
-const ACC: [number, number, number, number] = [520, 34, 150, 62];
-const FB: [number, number, number, number] = [520, 204, 150, 62];
-
-const ROUTE_UP: Pt[] = [IN, [PRIM[0] + PRIM[2] / 2, 150], [VER[0] + VER[2] / 2, 150], [460, 150], [460, 65], [ACC[0] + ACC[2] / 2, 65]];
-const ROUTE_DOWN: Pt[] = [IN, [PRIM[0] + PRIM[2] / 2, 150], [VER[0] + VER[2] / 2, 150], [460, 150], [460, 235], [FB[0] + FB[2] / 2, 235]];
-
-const lenOf = (pts: Pt[]) => pts.slice(1).reduce((s, p, i) => s + Math.hypot(p[0] - pts[i][0], p[1] - pts[i][1]), 0);
-function along(pts: Pt[], f: number): Pt {
-  let d = Math.max(0, Math.min(1, f)) * lenOf(pts);
-  for (let i = 1; i < pts.length; i++) {
-    const a = pts[i - 1];
-    const b = pts[i];
-    const l = Math.hypot(b[0] - a[0], b[1] - a[1]);
-    if (d <= l) return [a[0] + ((b[0] - a[0]) * d) / l, a[1] + ((b[1] - a[1]) * d) / l];
-    d -= l;
-  }
-  return pts[pts.length - 1];
-}
-const easeInOutSine = (x: number) => -(Math.cos(Math.PI * x) - 1) / 2;
+const P = (id: Id): Pt => [N[id].x, N[id].y];
+const straight = (a: Id, b: Id) => trim([P(a), P(b)], R + 5, R + 5);
+const EDGES = {
+  in: straight('tasks', 'primary'),
+  check: straight('primary', 'verify'),
+  up: straight('verify', 'accept'),
+  down: trim(bend(P('verify'), P('ref'), 'diag'), R + 5, R + 5),
+};
+const LEN = Object.fromEntries(Object.entries(EDGES).map(([k, v]) => [k, length(v)])) as Record<keyof typeof EDGES, number>;
 
 export function CascadeFlow() {
   const tk = useTokens();
@@ -105,15 +97,39 @@ export function CascadeFlow() {
     ? { D: A + (tally.done - tally.acc) / tally.done, V: 1 - tally.fa / tally.done }
     : { D: ED, V: EV };
 
-  const box = (b: [number, number, number, number], title: string, sym: string, fill: string, stroke: string) => (
-    <g>
-      <rect x={b[0]} y={b[1]} width={b[2]} height={b[3]} rx={12} fill={fill} stroke={stroke} strokeWidth={1.3} />
-      <text x={b[0] + b[2] / 2} y={b[1] + 25} textAnchor="middle" fontSize={14} fontWeight={600} fill="var(--ink)" style={sans}>
-        {title}
-      </text>
-      <TexLabel x={b[0] + b[2] / 2} y={b[1] + 44} t={sym} size={14} color="var(--ink-2)" w={b[2]} />
-    </g>
-  );
+  // packets and pulses for the tasks in flight
+  const packets: { pts: Pt[]; s: number; color: string; hollow: boolean }[] = [];
+  const pulse: Partial<Record<Id, { p: number; tone: Tone }>> = {};
+  const hit = (id: Id, at: number, tone: Tone) => {
+    if (t >= at && t < at + 0.7) {
+      const p = 1 - (t - at) / 0.7;
+      if (!pulse[id] || pulse[id]!.p < p) pulse[id] = { p, tone };
+    }
+  };
+  for (const d of tasks) {
+    const age = d.age;
+    // as in the paper's accounting: a right answer is filled, a wrong one hollow; a rejected task
+    // is replaced by the reference's answer (amber), an accepted wrong one is a false accept (coral)
+    const before = d.right ? 'var(--blue)' : 'var(--ink-3)';
+    const after = !d.acc ? 'var(--amber)' : d.right ? 'var(--blue)' : 'var(--coral)';
+    const legs: [keyof typeof EDGES, number, string, boolean][] = [
+      ['in', 0, before, !d.right],
+      ['check', LEG + 0.1, before, !d.right],
+      [d.acc ? 'up' : 'down', 2 * LEG + 0.2, after, d.acc && !d.right],
+    ];
+    for (const [e, at, color, hollow] of legs) {
+      const u = (age - at) / LEG;
+      if (u > 0 && u < 1) {
+        const eased = u < 0.5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2;
+        packets.push({ pts: EDGES[e], s: eased * LEN[e] + 10, color, hollow });
+      }
+    }
+    const t0 = t - age;
+    hit('primary', t0 + LEG, 'blue');
+    hit('verify', t0 + 2 * LEG + 0.1, d.acc ? 'teal' : 'amber');
+    if (d.acc) hit('accept', t0 + 3 * LEG + 0.2, d.right ? 'teal' : 'coral');
+    else hit('ref', t0 + 3 * LEG + 0.2, 'amber');
+  }
 
   return (
     <div ref={ref}>
@@ -136,45 +152,40 @@ export function CascadeFlow() {
         />
       </div>
       <svg viewBox={`0 0 ${VW} ${VH}`} className="h-auto w-full overflow-visible" role="img" aria-label="A reference-fallback cascade: each task is tried on a cheap primary, a verifier accepts or rejects it, and rejected tasks fall back to the reference.">
-        {/* rails */}
-        <g fill="none" stroke="var(--rule-2)" strokeWidth={1.4}>
-          <path d={`M${ROUTE_UP.map((p) => p.join(',')).join(' L')}`} />
-          <path d={`M${ROUTE_DOWN.slice(3).map((p) => p.join(',')).join(' L')}`} />
-        </g>
-
-        {/* tasks travel under the boxes, so they enter and leave each stage */}
-        {tasks.map((d) => {
-          const f = d.age / TRAVEL;
-          if (f < 0 || f > 1) return null;
-          const p = along(d.acc ? ROUTE_UP : ROUTE_DOWN, easeInOutSine(f));
-          const past = f > 0.55; // verdict known after the verifier
-          const falseAcc = d.acc && !d.right;
-          return (
-            <g key={d.i} transform={`translate(${p[0]},${p[1]})`}>
-              {past && falseAcc && <circle r={11} fill="none" stroke="var(--coral)" strokeWidth={2} />}
-              <circle r={6} fill={d.right ? 'var(--ink)' : 'var(--surface)'} stroke="var(--ink)" strokeWidth={1.6} />
-            </g>
-          );
-        })}
-
-        {box(PRIM, 'Primary', 'P', 'var(--surface)', 'var(--rule-2)')}
-        {box(VER, 'Verify', 'H_\\theta = \\mathbf 1\\{\\Sigma\\ge\\theta\\}', 'var(--surface)', 'var(--rule-2)')}
-        {box(ACC, 'Accept', 'V = Y_P', 'var(--teal-wash)', 'color-mix(in oklab, var(--teal) 50%, transparent)')}
-        {box(FB, 'Fall back to B', 'V = Y_B,\\ \\text{pay } C_B', 'var(--amber-wash)', 'color-mix(in oklab, var(--amber) 50%, transparent)')}
-        <TexLabel x={472} y={100} t="H=1" anchor="start" size={13} color="var(--teal)" w={60} />
-        <TexLabel x={472} y={200} t="H=0" anchor="start" size={13} color="var(--amber)" w={60} />
-        <TexLabel x={PRIM[0] + PRIM[2] / 2} y={PRIM[1] - 16} t="\text{pay } A \text{ on every task}" size={12.5} color="var(--ink-3)" w={180} />
-
-        {/* legend */}
-        <g transform="translate(14, 282)" style={sans} fontSize={12} fill="var(--ink-3)">
-          <circle cx={6} cy={0} r={5.5} fill="var(--ink)" />
-          <text x={16} y={4}>primary right</text>
-          <circle cx={124} cy={0} r={5.5} fill="var(--surface)" stroke="var(--ink)" strokeWidth={1.5} />
-          <text x={134} y={4}>primary wrong</text>
-          <circle cx={252} cy={0} r={8} fill="none" stroke="var(--coral)" strokeWidth={2} />
-          <text x={266} y={4}>false accept: the only way a cascade loses quality</text>
-        </g>
+        {(Object.keys(EDGES) as (keyof typeof EDGES)[]).map((e, i) => (
+          <FlowEdge key={e} pts={EDGES[e]} delay={0.1 + i * 0.08} />
+        ))}
+        <foreignObject x={(N.verify.x + N.accept.x) / 2 - 76} y={(N.verify.y + N.accept.y) / 2 - 30} width={80} height={24} style={{ overflow: 'visible' }}>
+          <div className="text-right text-[14px] text-teal" dangerouslySetInnerHTML={{ __html: tex('H=1') }} />
+        </foreignObject>
+        <foreignObject x={N.verify.x + 112} y={N.ref.y - 32} width={80} height={24} style={{ overflow: 'visible' }}>
+          <div className="text-[14px] text-amber" dangerouslySetInnerHTML={{ __html: tex('H=0') }} />
+        </foreignObject>
+        {packets.map((p, i) => (
+          <Packet key={i} pts={p.pts} s={p.s} len={22} width={p.hollow ? 6 : 4.5} color={p.color} hollow={p.hollow} />
+        ))}
+        {(Object.keys(N) as Id[]).map((id) => (
+          <FlowNode
+            key={id}
+            x={N[id].x}
+            y={N[id].y}
+            r={R}
+            label={N[id].label}
+            caption={N[id].caption}
+            size={id === 'ref' ? 15 : 16.5}
+            pulse={pulse[id]?.p ?? 0}
+            pulseTone={pulse[id]?.tone}
+            tone={pulse[id] && pulse[id]!.p > 0.5 && pulse[id]!.tone !== 'blue' ? pulse[id]!.tone : 'idle'}
+          />
+        ))}
       </svg>
+
+      <div className="mt-1 flex flex-wrap items-center gap-x-5 gap-y-2 font-sans text-[12px] text-ink-3">
+        <Swatch color="var(--blue)" label="primary right" />
+        <Swatch color="var(--ink-3)" label="primary wrong" hollow />
+        <Swatch color="var(--coral)" label="false accept: the only way a cascade loses quality" hollow />
+        <Swatch color="var(--amber)" label="fallback to the reference" />
+      </div>
 
       <div className="mt-5 grid grid-cols-2 gap-3 md:grid-cols-4">
         <div className="rounded-xl border border-rule bg-surface px-3 py-2">
@@ -197,8 +208,23 @@ export function CascadeFlow() {
         <div className="rounded-xl border border-rule bg-surface-2 px-4 py-1 text-center text-ink" dangerouslySetInnerHTML={{ __html: tex('V = H\\,Y_P + (1-H)\\,Y_B', true) }} />
         <div className="rounded-xl border border-rule bg-surface-2 px-4 py-1 text-center text-ink" dangerouslySetInnerHTML={{ __html: tex('D = A + (1-H)\\,C_B', true) }} />
       </div>
-      <p className="mt-3 font-sans text-[12.5px] text-ink-3">Stricter checks buy quality with fallbacks: the verifier is itself a point on a cost–quality menu (Finding 5).</p>
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+        <FigTag>Reference-fallback cascade</FigTag>
+        <p className="font-sans text-[12.5px] text-ink-3">Stricter checks buy quality with fallbacks: the verifier is itself a point on a cost–quality menu (Finding 5).</p>
+      </div>
     </div>
+  );
+}
+
+function Swatch({ color, label, hollow = false }: { color: string; label: string; hollow?: boolean }) {
+  return (
+    <span className="flex items-center gap-2">
+      <span
+        className={`inline-block w-[20px] ${hollow ? 'h-[7px] rounded-full border-[1.5px]' : 'h-[4.5px]'}`}
+        style={hollow ? { borderColor: color } : { background: color }}
+      />
+      {label}
+    </span>
   );
 }
 

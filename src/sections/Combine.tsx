@@ -42,7 +42,7 @@ export function Combine() {
 
       <div className="mt-10 md:ml-[190px]">
         <Plate
-          fig="9"
+          fig="11"
           title="The fallback population moves when a model joins"
           source={{ kind: 'data', ref: '§4.2 example' }}
           caption={
@@ -67,7 +67,7 @@ export function Combine() {
 
       <div className="mt-10 md:ml-[190px]">
         <Plate
-          fig="10"
+          fig="12"
           title="Paired selection picks the best candidate most often"
           source={{ kind: 'data', ref: 'Table 1' }}
           caption={

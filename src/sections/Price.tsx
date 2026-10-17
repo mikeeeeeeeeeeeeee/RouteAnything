@@ -5,6 +5,7 @@ import { MathBlock } from '@/components/math/MathBlock';
 import { Sym, s } from '@/components/math/Sym';
 import { M } from '@/components/math/M';
 import { PrimalDual } from '@/components/viz/PrimalDual';
+import { DinkelbachFigure } from '@/components/viz/DinkelbachFigure';
 import { BarList } from '@/components/viz/BarList';
 import { PRICES } from '@/data/results';
 
@@ -71,6 +72,24 @@ export function Price() {
         </Statement>
       </div>
 
+      <div className="mt-12 md:ml-[190px]">
+        <Plate
+          fig="5"
+          title="Every action is a line; Dinkelbach walks down the envelope"
+          source={{ kind: 'schematic', note: 'one state, six actions' }}
+          caption={
+            <>
+              At price <M>{'\\lambda'}</M>, action <M>{'u'}</M> is worth <M>{'v-\\lambda c'}</M>, a line. A router takes the highest line, so the
+              best it can do is the upper envelope <M>{'\\Phi(\\lambda)'}</M>: convex, strictly decreasing, and zero exactly at the best efficiency{' '}
+              <M>{'\\eta^\\star'}</M>. Part (ii) starts at the reference&rsquo;s efficiency <M>{'\\lambda_0=\\eta_B'}</M>, takes the best line there,
+              and jumps to that line&rsquo;s own efficiency, reaching <M>{'\\eta^\\star'}</M> in finitely many steps. Sweep the figure to scan the price.
+            </>
+          }
+        >
+          <DinkelbachFigure />
+        </Plate>
+      </div>
+
       <Prose className="mt-12">
         <p>
           The key consequence is part (iii). When the floor binds, the constrained optimum is an ordinary <M>{'J_\\lambda'}</M> optimum at
@@ -85,7 +104,7 @@ export function Price() {
 
       <div className="mt-10 md:ml-[190px]">
         <Plate
-          fig="4"
+          fig="6"
           title="One operating point, read two ways"
           source={{ kind: 'schematic', note: 'one state, six actions' }}
           caption={

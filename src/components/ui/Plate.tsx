@@ -24,7 +24,7 @@ export function Plate({ fig, title, controls, caption, source, children, classNa
   return (
     <motion.figure
       id={id}
-      className={`plate graph-paper-soft relative scroll-mt-24 overflow-hidden ${className}`}
+      className={`plate relative scroll-mt-24 overflow-hidden ${className}`}
       initial={{ opacity: 0, y: 28 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-80px' }}

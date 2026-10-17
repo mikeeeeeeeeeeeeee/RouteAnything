@@ -76,7 +76,7 @@ export function Certificate() {
 
       <div className="mt-10 md:ml-[190px]">
         <Plate
-          fig="5"
+          fig="7"
           title="Test in order, stop at the first failure"
           source={{ kind: 'schematic', note: 'simulated p-values' }}
           caption={
@@ -104,7 +104,7 @@ export function Certificate() {
 
       <div className="mt-10 md:ml-[190px]">
         <Plate
-          fig="6"
+          fig="8"
           title="200 random splits, three ways to set the floor"
           source={{ kind: 'data', ref: '§4.1, App. B.2' }}
           caption={

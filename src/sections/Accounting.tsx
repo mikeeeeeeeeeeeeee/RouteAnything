@@ -75,7 +75,7 @@ export function Accounting() {
 
       <div className="mt-10 md:ml-[190px]">
         <Plate
-          fig="2"
+          fig="3"
           title="Two conditions, not one"
           source={{ kind: 'schematic', note: 'after the paper’s Fig. 1c' }}
           caption={
@@ -107,14 +107,15 @@ export function Accounting() {
 
       <div className="mt-10 md:ml-[190px]">
         <Plate
-          fig="3"
+          fig="4"
           title="A cascade pays twice on the tasks it rejects"
           source={{ kind: 'schematic', note: 'illustrative rates' }}
           caption={
             <>
-              Each dot is a task. Filled dots are tasks the primary gets right. Every task pays <M>{'A'}</M>; the rejected ones also pay{' '}
-              <M>{'C_B'}</M> and receive the reference&rsquo;s answer. Illustration only: the primary is right on 45% of tasks, costs a tenth of
-              the reference, and the reference is always right.
+              Each moving segment is a task: blue when the primary gets it right, grey when it does not. Every task pays <M>{'A'}</M>; the
+              ones the verifier rejects turn amber, also pay <M>{'C_B'}</M>, and receive the reference&rsquo;s answer. A wrong answer that
+              is accepted turns coral, and that is the only way the cascade loses quality. Switch the verifier to trade the two off.
+              Illustration only: the primary is right on 45% of tasks, costs a tenth of the reference, and the reference is always right.
             </>
           }
         >

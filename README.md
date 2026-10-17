@@ -4,9 +4,11 @@ Project page for **Route Anything: Quality–Cost Tradeoffs in Model Routing** (
 
 The page is set like an interactive monograph: every formal result (Lemma 1, Theorem 2, Propositions 3 and 4) sits in
 its own plate with a proof idea, every symbol carries a hover card, and every finding is redrawn from the paper's
-tables as a live figure. Light ("vellum") and dark ("slate") themes; the visitor's choice is remembered.
+tables as a live figure. It opens on an animated schematic of what a router is (Fig. 00, the capability field), and
+its route diagrams share one drawing language: circles, thin edges, packets travelling along them. Light ("vellum")
+and dark ("slate") themes; light has no background, dark is lit by Side Rays. The visitor's choice is remembered.
 
-React 19 + Vite + Tailwind CSS v4 + KaTeX, with 32 effects and components from [React Bits](https://reactbits.dev)
+React 19 + Vite + Tailwind CSS v4 + KaTeX, with 30 effects and components from [React Bits](https://reactbits.dev)
 (TS + Tailwind variants, vendored in `src/components/reactbits/`).
 
 ## Run and build
@@ -32,7 +34,7 @@ address differs. Any static host works too: upload the contents of `dist/`.
 | Title, team, date, abstract, BibTeX, **links** (PDF / arXiv / code, empty = "soon") | `src/data/paper.ts` |
 | Every number on the page (Tables 1–9, Fig. 3, Fig. 8 and the text) | `src/data/results.ts` |
 | Symbols and their hover-card definitions | `src/data/notation.ts` |
-| The schematic action menu behind Figs. 0, 4 (Theorem 2) | `src/lib/envelope.ts`, `src/lib/frontier.ts` |
+| The schematic action menu behind Figs. 5, 6 (Theorem 2) | `src/lib/envelope.ts`, `src/lib/frontier.ts` |
 | Sections, in page order | `src/sections/*.tsx` |
 | Figures | `src/components/viz/*.tsx` |
 | Colours (validated for colour-vision deficiency in both themes) | `src/index.css`, `src/theme/tokens.ts` |

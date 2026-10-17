@@ -73,7 +73,7 @@ export function Reference() {
 
       <div className="mt-10 md:ml-[190px]">
         <Plate
-          fig="7"
+          fig="9"
           title="Admission price against floor price"
           source={{ kind: 'data', ref: 'Finding 1 · App. B.2' }}
           caption={
@@ -101,7 +101,7 @@ export function Reference() {
 
       <div className="mt-10 md:ml-[190px]">
         <Plate
-          fig="8"
+          fig="10"
           title="Efficiency, cost and quality favour different policies"
           source={{ kind: 'data', ref: 'Fig. 3 · Table 3' }}
           caption={

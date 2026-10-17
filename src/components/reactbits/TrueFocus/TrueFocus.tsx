@@ -4,6 +4,8 @@ import { useEffect, useLayoutEffect, useRef, useState, type FC } from 'react';
 import { motion, useReducedMotion, type Transition } from 'motion/react';
 
 interface TrueFocusProps {
+  /** controlled focus: when set, the word at this index is focused and the timer is off */
+  index?: number;
   sentence?: string;
   separator?: string;
   manualMode?: boolean;
@@ -40,6 +42,7 @@ const SPRING_CSS = 'cubic-bezier(0.34, 1.56, 0.64, 1)';
 const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
 const TrueFocus: FC<TrueFocusProps> = ({
+  index,
   sentence = 'True Focus',
   separator = ' ',
   manualMode = false,
@@ -64,14 +67,14 @@ const TrueFocus: FC<TrueFocusProps> = ({
   const wordRefs = useRef<(HTMLSpanElement | null)[]>([]);
   const reduceMotion = useReducedMotion();
   const duration = reduceMotion ? 0 : animationDuration;
-  const activeIndex = words.length ? currentIndex % words.length : -1;
+  const activeIndex = words.length ? (index ?? currentIndex) % words.length : -1;
   const spring = easing === 'spring' && !reduceMotion;
   const transition: Transition = spring
     ? { type: 'spring', visualDuration: duration, bounce: 0.38 }
     : { duration, ease: SMOOTH_EASE };
 
   useEffect(() => {
-    if (manualMode || words.length < 2) return;
+    if (manualMode || index !== undefined || words.length < 2) return;
     const interval = setInterval(
       () => {
         const roll = Math.random();
@@ -85,7 +88,7 @@ const TrueFocus: FC<TrueFocusProps> = ({
       (animationDuration + pauseBetweenAnimations) * 1000
     );
     return () => clearInterval(interval);
-  }, [manualMode, animationDuration, pauseBetweenAnimations, words.length, order]);
+  }, [manualMode, index, animationDuration, pauseBetweenAnimations, words.length, order]);
 
   useIsomorphicLayoutEffect(() => {
     const container = containerRef.current;
@@ -151,7 +154,7 @@ const TrueFocus: FC<TrueFocusProps> = ({
 
   return (
     <div
-      className="relative flex gap-[1em] justify-center items-center flex-wrap outline-none select-none"
+      className="relative flex gap-[0.62em] justify-start items-center flex-wrap outline-none select-none"
       ref={containerRef}
     >
       {focusStyle === 'highlight' && shapes && (
@@ -173,7 +176,7 @@ const TrueFocus: FC<TrueFocusProps> = ({
             ref={el => {
               wordRefs.current[index] = el;
             }}
-            className="relative text-[3rem] font-black cursor-pointer outline-none select-none"
+            className="relative text-[1em] cursor-pointer outline-none select-none"
             style={{
               filter: `blur(${isActive ? 0 : blurAmount}px)`,
               opacity: isActive ? 1 : unfocusedOpacity,

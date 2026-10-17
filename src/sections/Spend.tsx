@@ -106,7 +106,7 @@ export function Spend() {
 
       <div className="mt-10 md:ml-[190px]">
         <Plate
-          fig="11"
+          fig="13"
           title="Failing-test feedback nearly doubles retry recovery"
           source={{ kind: 'data', ref: 'Table 6' }}
           caption={
@@ -136,7 +136,7 @@ export function Spend() {
       </Prose>
       <div className="mt-10 md:ml-[190px]">
         <Plate
-          fig="12"
+          fig="14"
           title="Verification is a cost–quality menu"
           source={{ kind: 'data', ref: 'Table 7 · Fig. 8' }}
           caption={
@@ -182,7 +182,7 @@ export function Spend() {
       </Prose>
       <div className="mt-10 md:ml-[190px]">
         <Plate
-          fig="13"
+          fig="15"
           title="What a signal can save, and what it may cost"
           source={{ kind: 'schematic', note: 'a = 0.3 b' }}
           caption={
@@ -207,7 +207,7 @@ export function Spend() {
       </Prose>
       <div className="mt-10 md:ml-[190px]">
         <Plate
-          fig="14"
+          fig="16"
           title="Released routers mainly recover the task type"
           source={{ kind: 'data', ref: 'Table 9' }}
           caption={

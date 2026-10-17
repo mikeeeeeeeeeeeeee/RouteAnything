@@ -13,6 +13,8 @@
    amber = the reference and its price (B, lambda^B)
    teal  = admissible / holds / certified
    coral = below the floor (always paired with a label or icon)
+   Route diagrams share one language: white circles, thin --line edges,
+   short packets travelling along them, mono captions under the nodes.
    ------------------------------------------------------------------ */
 :root {
   color-scheme: light;
@@ -28,6 +30,8 @@
   --rule-2: #d5d0c5;
   --grid: rgba(21, 23, 28, 0.05);
   --grid-strong: rgba(21, 23, 28, 0.09);
+  --line: #bcb6aa;
+  --line-soft: #e4dfd5;
 
   --accent: #c21a2b;
   --accent-ink: #a5121f;
@@ -63,6 +67,8 @@
   --rule-2: #314049;
   --grid: rgba(238, 240, 236, 0.045);
   --grid-strong: rgba(238, 240, 236, 0.085);
+  --line: #4a5962;
+  --line-soft: #27333b;
 
   --accent: #ff6b6b;
   --accent-ink: #ff8585;
@@ -99,6 +105,8 @@
   --color-accent-ink: var(--accent-ink);
   --color-accent-wash: var(--accent-wash);
   --color-blue: var(--blue);
+  --color-line: var(--line);
+  --color-line-soft: var(--line-soft);
   --color-amber: var(--amber);
   --color-teal: var(--teal);
   --color-coral: var(--coral);
@@ -196,32 +204,11 @@
 }
 
 /* ---------- surfaces ---------- */
-.graph-paper {
-  background-image:
-    linear-gradient(var(--grid) 1px, transparent 1px),
-    linear-gradient(90deg, var(--grid) 1px, transparent 1px),
-    linear-gradient(var(--grid-strong) 1px, transparent 1px),
-    linear-gradient(90deg, var(--grid-strong) 1px, transparent 1px);
-  background-size:
-    24px 24px,
-    24px 24px,
-    120px 120px,
-    120px 120px;
-  background-position: -1px -1px;
-}
 .plate {
   background: var(--surface);
   border: 1px solid var(--rule);
   border-radius: 22px;
   box-shadow: var(--shadow);
-}
-.hairline {
-  border-color: var(--rule);
-}
-
-/* chalk: in dark mode the strokes of figures pick up a faint glow */
-.chalk {
-  filter: drop-shadow(var(--chalk-glow));
 }
 
 /* no scrollbars inside figures */
@@ -236,16 +223,6 @@
   html {
     scroll-behavior: auto;
   }
-}
-
-/* faint grid inside figure plates */
-.graph-paper-soft {
-  background-color: var(--surface);
-  background-image:
-    linear-gradient(color-mix(in oklab, var(--grid) 70%, transparent) 1px, transparent 1px),
-    linear-gradient(90deg, color-mix(in oklab, var(--grid) 70%, transparent) 1px, transparent 1px);
-  background-size: 20px 20px;
-  background-position: -1px -1px;
 }
 
 /* symbols inside rendered TeX that carry a hover card (\htmlData{sym=...}) */
@@ -285,4 +262,22 @@
 .display {
   --tw-numeric-figure: lining-nums;
   font-variant-numeric: lining-nums;
+}
+
+/* packets travelling along the part-divider routes */
+@keyframes part-route {
+  from {
+    stroke-dashoffset: 1000;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+.part-route {
+  animation: part-route 2.8s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .part-route {
+    animation: none;
+  }
 }

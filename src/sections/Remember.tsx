@@ -37,7 +37,7 @@ export function Remember() {
 
       <div className="mt-10 md:ml-[190px]">
         <Plate
-          fig="15"
+          fig="17"
           title="When a covered cell helps"
           source={{ kind: 'schematic', note: 'one cell' }}
           caption={
@@ -64,7 +64,7 @@ export function Remember() {
 
       <div className="mt-10 md:ml-[190px]">
         <Plate
-          fig="16"
+          fig="18"
           title="One record store, two priors"
           source={{ kind: 'data', ref: 'Table 2' }}
           caption={

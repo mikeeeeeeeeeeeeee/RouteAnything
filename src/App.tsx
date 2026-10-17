@@ -3,9 +3,9 @@ import { TopBar } from '@/components/ui/TopBar';
 import { MarginToc } from '@/components/ui/MarginToc';
 import { ToastHost } from '@/components/ui/toast';
 import { PartDivider } from '@/components/ui/PartDivider';
+import { PageBackground } from '@/components/ui/PageBackground';
 import { NotationDrawer } from '@/components/ui/NotationDrawer';
 import { SymHost } from '@/components/math/Sym';
-import Noise from '@/components/reactbits/Noise/Noise';
 import GradualBlur from '@/components/reactbits/GradualBlur/GradualBlur';
 import { Hero } from '@/sections/Hero';
 import { Problem } from '@/sections/Problem';
@@ -23,6 +23,7 @@ export default function App() {
   const [notation, setNotation] = useState(false);
   return (
     <>
+      <PageBackground />
       <TopBar onNotation={() => setNotation((n) => !n)} />
       <MarginToc />
       <main>
@@ -44,7 +45,6 @@ export default function App() {
       <SymHost />
       <ToastHost />
       <GradualBlur target="page" position="bottom" height="3.25rem" strength={1} layers={4} curve="bezier" tint="color-mix(in oklab, var(--bg) 65%, transparent)" zIndex={40} autoHide />
-      <Noise fixed zIndex={60} opacity={0.05} fps={0} blendMode="overlay" contrast={0.5} />
     </>
   );
 }
