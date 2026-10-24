@@ -13,70 +13,62 @@ export function Certificate() {
   return (
     <Section
       id="floor"
-      n="3"
+      n="5"
       kicker={
         <>
-          <span>Proposition 3</span>
+          <span>Proposition 5</span>
           <span className="text-ink-4">·</span>
-          <span className="text-ink-3">Certified quality floor along the price path</span>
-          <span className="text-ink-4">·</span>
-          <span className="text-ink-3">Finding 2</span>
+          <span className="text-ink-3">Certified quality floor</span>
         </>
       }
       title="A fitted floor is not a guarantee. A certified one is."
-      lede="Theorem 2 is applied to fitted numbers, so nothing ensures the floor holds on new tasks. The price path turns the fitted solutions into a short, ordered family of routers that can be tested one by one."
+      lede="Theorem 2 is applied to fitted values and costs, so a fitted floor need not hold on new inputs. Testing a short, ordered family of routers on fresh inputs makes it hold with a stated probability."
     >
       <div className="md:ml-[190px]">
         <Statement
           kind="Proposition"
-          n="3"
-          name="Certified quality floor along the price path"
-          source="Paper §2 · proof in App. A.3"
+          n="5"
+          name="Certified quality floor"
+          source="Paper §2 · proof in App. A.5"
           proof={
             <>
-              Part (a): the fitted maximisers change only at breakpoints of a piecewise-linear convex function, and each breakpoint swaps one
-              action for a cheaper one in one state, which bounds <M>{'K'}</M> and makes value and cost fall while efficiency rises. Part (b):
-              the order of the hypotheses is fixed in advance by the price path, and testing stops at the first non-rejection, so the
-              procedure rejects a true null only if it rejects the <em>first</em> true null in the sequence, which happens with probability
-              at most <M>{'\\alpha'}</M>. This is fixed-sequence testing; returning the reference when nothing is certified mirrors
-              high-confidence policy improvement.
+              Condition on the fitting data, which fixes the routers, their order and their true quality changes. If the selected router breaks
+              the floor, then some router up to it does, and the first such router in the order was tested and passed: its p-value was at most{' '}
+              <M>{'\\alpha'}</M>. That happens with probability at most <M>{'\\alpha'}</M>, because its null hypothesis is true. The reference
+              itself never breaks the floor. This is fixed-sequence testing; it needs no condition on how the p-values, which share one sample,
+              depend on each other.
             </>
           }
         >
           <p>
-            In the setting of Theorem 2, let values lie in <M>{'[0,1]'}</M> and the reference be admissible with positive fitted value. Fit{' '}
-            <M>{'\\hat\\pi,\\hat v,\\hat c'}</M> on a sample <M>{'\\mathcal A'}</M>, and let <M>{'g_1,\\dots,g_K'}</M> be the maximisers of the
-            fitted <M>{'\\hat J_\\lambda'}</M> on the successive breakpoint intervals of <M>{'\\lambda\\in[0,\\hat\\eta^\\star]'}</M>.
+            Let values lie in <M>{'[0,1]'}</M>, let <M>{'\\epsilon\\ge0'}</M> and <M>{`${s('alpha')}\\in(0,1)`}</M>, and let the routers{' '}
+            <M>{'g_1,\\dots,g_K'}</M> and their order be fixed by the fitting data. Let <Sym k="pk" /> be valid p-values for the null
+            hypotheses <M>{'Q_{g_k}<-\\epsilon'}</M>, computed on <M>{'n'}</M> inputs drawn i.i.d. from the deployment law, independently of
+            the fitting data, with matched outcomes; for instance
           </p>
-          <p className="mt-3">
-            <span className="mr-2 font-display text-[19px] italic text-accent">(a)</span>
-            <M>{'K\\le 1+\\sum_x(|\\mathcal U(x)|-1)'}</M>, and along <M>{'k'}</M> fitted value and cost strictly decrease while fitted
-            efficiency strictly increases.
-          </p>
-          <p className="mt-3">
-            <span className="mr-2 font-display text-[19px] italic text-accent">(b)</span>
-            Fix <M>{'\\epsilon\\ge0'}</M> and <M>{`${s('alpha')}\\in(0,1)`}</M>, and let <Sym k="pk" /> be valid p-values for the null{' '}
-            <M>{'Q_{g_k}<-\\epsilon'}</M>, computed on <M>{'n'}</M> fresh tasks drawn independently of <M>{'\\mathcal A'}</M>; for instance
-          </p>
-          <MathBlock compact>{'p_k=\\exp\\!\\big\\{-n\\,(\\hat Q_k+\\epsilon)_+^2/2\\big\\}.'}</MathBlock>
+          <MathBlock compact>{'p_k=\\exp\\!\\big\\{-n\\,(\\hat Q_k+\\epsilon)_+^2/2\\big\\},'}</MathBlock>
           <p>
-            With <M>{'\\hat k=\\max\\{k:\\,p_1,\\dots,p_k\\le\\alpha\\}'}</M> (the reference if <M>{'p_1>\\alpha'}</M>),{' '}
-            <M>{'\\mathbb P\\big(Q_{g_{\\hat k}}<-\\epsilon\\big)\\le\\alpha'}</M>.
+            where <M>{'\\hat Q_k'}</M> is the sample mean of <M>{'V_{g_k}-Y_B'}</M>. Let <M>{'\\hat g=g_{\\hat k}'}</M> with{' '}
+            <M>{'\\hat k=\\max\\{k:\\,p_1,\\dots,p_k\\le\\alpha\\}'}</M>, or the reference if <M>{'p_1>\\alpha'}</M>. Then{' '}
+            <M>{'\\mathbb P\\big(Q_{\\hat g}<-\\epsilon\\big)\\le\\alpha'}</M>.
           </p>
         </Statement>
       </div>
 
       <Prose className="mt-12">
         <p>
-          The price path fixes the testing order, so no multiplicity correction is needed. The certified router also comes with a{' '}
-          <em>certified price</em>: the reference, the tolerance and the level fix <M>{'\\lambda'}</M>. On the full probing set the path has
-          only {CERTIFICATION.pathRouters} routers, against the bound of {CERTIFICATION.pathBound}.
+          A natural order is the <em>price path</em> (the paper&rsquo;s Fig. 2): the maximisers of the fitted <M>{'J_\\lambda'}</M> as{' '}
+          <M>{'\\lambda'}</M> rises from 0 to the fitted <M>{'\\eta^\\star'}</M>, along which fitted value and cost fall while fitted
+          efficiency rises. The test stops at the first router it cannot certify, so no multiplicity correction is needed, and returning the
+          reference when nothing is certified mirrors high-confidence policy improvement. The certified router comes with a{' '}
+          <em>certified price</em>: the reference, the tolerance and the level fix <M>{'\\lambda'}</M>. On CodeRouterBench&rsquo;s probing
+          set the path has only {CERTIFICATION.pathRouters} routers, against the bound of {CERTIFICATION.pathBound}.
         </p>
       </Prose>
 
       <div className="mt-10 md:ml-[190px]">
         <Plate
-          fig="7"
+          fig="8"
           title="Test in order, stop at the first failure"
           source={{ kind: 'schematic', note: 'simulated p-values' }}
           caption={
@@ -94,26 +86,27 @@ export function Certificate() {
 
       <Prose className="mt-16">
         <p>
-          <strong>In the data.</strong> Refitted on a random half of probing, the zero-loss floor keeps test <M>{'\\Delta V\\ge 0'}</M> in only
-          12.5% of 200 splits. Certified on the other half with empirical-Bernstein p-values, it keeps the floor in all 200, at a median{' '}
-          {CERTIFICATION.medianEff}× efficiency and a certified price of {CERTIFICATION.certifiedPriceRel}
-          <M>{'\\,\\eta_B'}</M>. On RouterBench, certified on half of the fitting prompts, the floor holds on held-out prompts in all 200
-          halvings, at a median 6.70×.
+          <strong>In the data.</strong> On CodeRouterBench, refitted on half of the probing tasks, the zero-loss floor holds on test in only
+          12.5% of 200 splits. Certified on the other half by Proposition 5, with empirical-Bernstein p-values on the mixture-refined path, it
+          holds in all 200, at a median {CERTIFICATION.medianEff}× the reference&rsquo;s efficiency. On RouterBench, certified on half of the
+          fitting prompts, the zero-loss floor holds on the test prompts in all 200 halvings, at a median 6.70×; uncertified fitted floors hold
+          on 4 of 11 splits with family states and on none with dataset states.
         </p>
       </Prose>
 
       <div className="mt-10 md:ml-[190px]">
         <Plate
-          fig="8"
-          title="200 random splits, three ways to set the floor"
-          source={{ kind: 'data', ref: '§4.1, App. B.2' }}
+          fig="9"
+          title="200 random splits, two ways to set the floor"
+          source={{ kind: 'data', ref: 'Table 5 · App. C.2' }}
           caption={
             <>
-              CodeRouterBench, zero-loss floor (<M>{'\\epsilon=0'}</M>), evaluated on the 2,919 test tasks. Rounding down to the last path
-              router that meets the fitted floor helps, but only certification on independent tasks holds every time. The guarantee is an
-              aggregate one: the certified router is negative in a median {CERTIFICATION.negCellsMedian} of {CERTIFICATION.cells} test cells.
-              Certifying every cell keeps all cells nonnegative, at {CERTIFICATION.cellwiseEff}× (against {CERTIFICATION.cellwiseDirectOnly}× with
-              direct dispatch alone).
+              CodeRouterBench, zero-loss floor (<M>{'\\epsilon=0'}</M>), evaluated on the 2,919 test tasks. Only certification on independent
+              tasks holds every time. The guarantee is an aggregate one: the certified router loses quality in a median{' '}
+              {CERTIFICATION.negCellsMedian} of {CERTIFICATION.cells} test cells. In {CERTIFICATION.nestedResplits.of} nested 70/30 resplits of
+              all 9,999 tasks the refined procedure holds the floor in {CERTIFICATION.nestedResplits.held}, at a median{' '}
+              {CERTIFICATION.nestedResplits.median}×. Certification needs every path action and the reference on <M>{'\\mathcal B'}</M>, at
+              $0.0158 per task against $0.0124 for Opus alone.
             </>
           }
         >
@@ -124,8 +117,8 @@ export function Certificate() {
               <span className="font-sans text-[12px] text-ink-3">median efficiency of the certified router, same 200 splits</span>
             </div>
             <p className="mb-5 font-serif text-[14.5px] text-ink-3">
-              Testing the whole path with a Bonferroni correction is also valid, but pays for multiplicity. The fixed order adds 1.9–3.7 to the
-              median multiplier.
+              Testing the whole path with a Bonferroni correction is also valid, but pays for multiplicity. The fixed order adds 1.9–3.7 to
+              the median multiplier.
             </p>
             <BarList
               labelWidth={230}

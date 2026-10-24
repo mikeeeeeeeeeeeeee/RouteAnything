@@ -6,7 +6,7 @@ import { useInView } from '@/lib/hooks';
 import { useTokens } from '@/theme/tokens';
 import { logScale, mono, sans, scale } from './svg';
 
-// Table 7 / Fig. 8: Qwen3-Max cascades with five verifiers, dollar efficiency including the
+// Table 15: Qwen3-Max cascades with five verifiers, dollar efficiency including the
 // verifier's cost (judge at the primary-price proxy), AUROC, and quality change at theta = 0.5.
 
 const VW = 760;

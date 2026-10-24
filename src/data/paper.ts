@@ -1,33 +1,53 @@
-// Paper metadata. Empty links render as "soon" pills; fill them in when the paper is public.
+// Paper metadata. The paper is not posted yet, so `released` stays false and every link renders as a
+// "soon" pill. The known addresses are kept here: going live is a one-line change.
+
+export const released = false;
 
 export const paper = {
   title: 'Route Anything',
-  subtitle: 'Quality–Cost Tradeoffs in Model Routing',
-  team: 'The InfRec Research Team',
+  subtitle: 'an attempt for AGI through a simple omni-modal router',
   lab: 'InfRec · Cardinal AI Lab',
   date: 'October 2026',
-  dateISO: '2026-10-15',
-  question: 'What should a router combine, when should it spend more, and what should it remember?',
+  dateISO: '2026-10-24',
+  question: 'How much can routing gain, what do learned routers recover, and when does routing pay through price?',
   links: {
     pdf: '',
     arxiv: '',
-    code: '',
+    code: 'https://github.com/InfRec-Cardinal/route-anything',
+    data: 'https://huggingface.co/datasets/Lance1573/route-anything-data',
   },
 };
 
+/** a link only once the paper is out */
+export const live = (href: string) => (released ? href : '');
+
+export const authors = [
+  { name: 'Pengfei Zhou', aff: [1, 2] },
+  { name: 'Yixing Ma', aff: [2, 3] },
+  { name: 'Hexin Wang', aff: [2], corresponding: true },
+  { name: 'Weidong Tang', aff: [1] },
+  { name: 'Zhenglin Wan', aff: [1] },
+  { name: 'Wangbo Zhao', aff: [4] },
+  { name: 'Yang You', aff: [1], corresponding: true },
+];
+
+export const affiliations = [
+  'National University of Singapore, HPC-AI Lab',
+  'InfRec, Cardinal AI Lab',
+  'University of California, Berkeley',
+  'Hong Kong University of Science and Technology',
+];
+
 export const abstract =
-  'An inference router decides which model or combination should handle a task, when to spend more computation, and what to remember from earlier outcomes. We study these coupled decisions with a reference-relative accounting: every policy is compared with a named reference policy on the same tasks, by its quality change and its saving in total resource cost, including routing, verification, and information costs, under an explicit tolerance for quality loss. For finite-menu routing with a quality floor, fractional programming shows that the reference and the tolerance fix the price at which a router should trade quality for cost; the resulting price path yields a finite-sample certificate for the floor, and the reference both sets this price and competes as an action at it. On CodeRouterBench and RouterBench, the accounting yields concrete findings. Whether a router escalates to the reference at all is decided by the price structure, not by the ratio objective. Fitted quality floors often fail on held-out tasks, whereas certified floors hold in all 200 random splits. Adding a model changes which tasks reach the fallback, and comparing both portfolios on the same tasks raises best-candidate selection on CodeRouterBench from 86.3–94.3% to 96.4–97.1%. A failure makes further attempts less attractive, yet failing-test feedback nearly doubles retry recovery, from 0.165 to 0.304 across seven models. Finally, released routers mainly recover the task type, and router memory pays only relative to the prior it replaces.';
+  'A router picks, for each input, which language model, image, video, or speech generator, or robot policy should run. We study routing across modalities on an outcome matrix that runs every arm of a pool on the same inputs: 25 benchmarks spanning text and image understanding, image, video, and speech generation, code and workplace agents, and robot manipulation, with 374,401 scored runs of 452 arm versions. We also develop a unified routing theory to organize the evidence. At a resource price, the best router plays, in each state it observes, the arm with the highest value minus priced cost, and a reference policy with a quality tolerance fixes that price. What a router observes bounds what it can reach, on a ladder from the best fixed arm through the best arm per task type to the per-input oracle. On held-out inputs, the per-input oracle beats the best fixed arm per benchmark by 5.4 points, and by 18–19 points for video generation and robot manipulation. Most of this gap lies within task types: on 18 benchmarks with labeled capability types, the best arm per type, chosen in hindsight, closes only 8% of it. Learned routers follow this ladder: across 16 benchmarks they match the best fixed arm and capture 6% of the headroom, with gains on agents, video, and image generation; on robot manipulation, a router that reads the camera frames matches the better policy in each scene condition with 24% less policy time. Regressing each arm’s outcome succeeds where predicting the winning arm fails (71.6% versus 42.8% robot success), and a fixed baseline that drops models with missing scores turns a router’s 0.4-point loss into a 2.4-point gain. Routing pays most through price: at near-zero quality loss, it raises efficiency 25.5× on code, 7.1× on text QA, and 1.35× on image generation.';
 
 /** Placeholder until the arXiv identifier exists. */
-export const bibtex = `@misc{infrec2026routeanything,
-  title         = {Route Anything: Quality--Cost Tradeoffs in Model Routing},
-  author        = {{The InfRec Research Team}},
+export const bibtex = `@misc{zhou2026routeanything,
+  title         = {Route Anything: an attempt for {AGI} through a simple omni-modal router},
+  author        = {Zhou, Pengfei and Ma, Yixing and Wang, Hexin and Tang, Weidong and Wan, Zhenglin and Zhao, Wangbo and You, Yang},
   year          = {2026},
   month         = oct,
   note          = {Technical report},
   archivePrefix = {arXiv},
   eprint        = {2610.xxxxx}
 }`;
-
-/** The paper's author block is still a template ("Author One", ...). */
-export const authorsPending = true;

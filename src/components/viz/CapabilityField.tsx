@@ -4,48 +4,54 @@ import { useClock, useInView, useReducedMotion } from '@/lib/hooks';
 import { d, pointAt, slice, smooth, type Pt } from '@/lib/polyline';
 import { tex } from '@/lib/tex';
 import { TexLabel } from './svg';
+import { PoolIcon, type Pool } from './icons';
 
-// Fig. 00, the capability field. A stateful router sits among CodeRouterBench's eight models.
-// Each round a task arrives, every plan is scored at a price, and the router commits to one of
-// three kinds of plan: a direct call, a verified cascade that escalates to the reference B, or a
-// portfolio. The outcome is written to the records the next round will read. Positions are
-// schematic; the model names and the facts in the hover cards are the paper's.
+// Fig. 00, the capability field. One router sits among arms of every output type: language models,
+// image, video and speech generators, and robot policies (ten of the matrix's 23 arms are drawn).
+// Each round an input arrives, the router scores every arm by value minus priced cost given what it
+// observes, and plays the best. The three rounds act out the paper's three questions: the best arm
+// changes from input to input (gain), a router that reads camera frames follows the better policy
+// in each scene (recover), and at a price a cheaper generator wins inside the floor (pay).
+// Positions are schematic; the arm names and the facts in the hover cards are the paper's.
 
 const W = 760;
 const H = 640;
 const C: Pt = [380, 316];
 const R_ROUTER = 62;
-const R_RECORDS = 77;
-const R_NODE = 22;
+const R_INNER = 77;
+const R_NODE = 23;
 const RINGS = [104, 152, 202, 254, 308, 366];
 const SWEEP_PERIOD = 7.5;
 
-interface Model {
+interface Arm {
   id: number;
   short: string;
   name: string;
+  pool: Pool;
   fact: string;
   angle: number;
   r: number;
-  reference?: boolean;
 }
 
-const MODELS: Model[] = [
-  { id: 1, short: 'MINIMAX-M2.7', name: 'MiniMax-M2.7', fact: 'Retries with failing-test feedback recover 0.383 per retry, against 0.290 fresh.', angle: -155, r: 250 },
-  { id: 2, short: 'GLM-5', name: 'GLM-5', fact: 'Retries with failing-test feedback recover 0.262 per retry, against 0.071 fresh.', angle: -115, r: 262 },
-  { id: 3, short: 'OPUS 4.6 · B', name: 'claude-opus-4-6, the reference B', fact: 'Always-Opus scores 0.4383 at 11.655 m$ per task: the yardstick and the fallback.', angle: -75, r: 266, reference: true },
-  { id: 4, short: 'QWEN3-MAX', name: 'Qwen3-Max', fact: 'Best single model on probing and the cheapest: 20.10× Opus’s efficiency at −0.0416 score.', angle: -15, r: 254 },
-  { id: 5, short: 'GPT-5.4', name: 'gpt-5.4', fact: 'One of the eight models whose outcomes and token prices CodeRouterBench records.', angle: 25, r: 262 },
-  { id: 6, short: 'KIMI-K2.5', name: 'Kimi-K2.5', fact: 'Feedback retries recover 0.219 per retry, against 0.105 fresh.', angle: 65, r: 242 },
-  { id: 7, short: 'QWEN3.5-PLUS', name: 'Qwen3.5-Plus', fact: 'Added to the pooled Qwen3-Max portfolio: predicted −1.4 score/$, realised +5.0.', angle: 105, r: 250 },
-  { id: 8, short: 'SONNET 4.6', name: 'claude-sonnet-4-6', fact: 'One of the eight models whose outcomes and token prices CodeRouterBench records.', angle: 165, r: 254 },
+const ARMS: Arm[] = [
+  { id: 1, short: 'OPUS 5.5', name: 'Claude Opus 5.5 · language model', pool: 'language', fact: 'The best fixed arm on most text, image-text and agent benchmarks.', angle: -162, r: 252 },
+  { id: 2, short: 'GPT-6.1 SOL', name: 'GPT-6.1 Sol · language model', pool: 'language', fact: 'The fixed arm on GDP.pdf, and the best arm in hindsight on AA-Briefcase.', angle: -134, r: 260 },
+  { id: 3, short: 'GPT IMAGE 2.5', name: 'GPT Image 2.5 · image generator', pool: 'image', fact: 'Best on GenEval2 and Qwen-Image-Bench, at $0.21 an image: 3.5–5.4× the other generators.', angle: -104, r: 262 },
+  { id: 4, short: 'GROK IMAGINE 2.0', name: 'Grok Imagine 2.0 · image generator', pool: 'image', fact: '60 m$ an image. The half-point price route moves Qwen-Image-Bench here.', angle: -76, r: 250 },
+  { id: 5, short: 'MINIMAX H3', name: 'MiniMax H3 · video generator', pool: 'video', fact: 'The best fixed video generator: 62.43 on VBench-2.0, where the per-input oracle reaches 81.36.', angle: -16, r: 258 },
+  { id: 6, short: 'SEEDANCE 2.5', name: 'Seedance 2.5 · video generator', pool: 'video', fact: 'One of three video generators. No video arm dominates: the per-input headroom is 18.9 points.', angle: 16, r: 252 },
+  { id: 7, short: 'FISH S2.1', name: 'Fish S2.1 Pro · speech generator', pool: 'speech', fact: 'The fixed speech generator and among the cheapest (0.9–1.1 m$), so there is nothing to trade.', angle: 52, r: 252 },
+  { id: 8, short: 'GEMINI 3.8 TTS', name: 'Gemini 3.8 Flash TTS · speech generator', pool: 'speech', fact: 'Best in hindsight on Seed-TTS (en), by 0.02 points: speech headroom is 0.7 points.', angle: 86, r: 250 },
+  { id: 9, short: 'ME-DEX', name: 'ME-Dex · robot policy', pool: 'robot', fact: 'The best single policy (70.45%), and the better one on domain-randomized scenes (62.5%).', angle: 124, r: 254 },
+  { id: 10, short: 'PATCHWAM', name: 'PatchWAM · robot policy', pool: 'robot', fact: 'Second overall (63.65%), but the better policy on clean scenes (81.7%).', angle: 172, r: 250 },
 ];
 
-const pos = (m: Model): Pt => [C[0] + m.r * Math.cos((m.angle * Math.PI) / 180), C[1] + m.r * Math.sin((m.angle * Math.PI) / 180)];
-const NODE = Object.fromEntries(MODELS.map((m) => [m.id, pos(m)])) as Record<number, Pt>;
+const ARM = Object.fromEntries(ARMS.map((a) => [a.id, a])) as Record<number, Arm>;
+const pos = (m: Arm): Pt => [C[0] + m.r * Math.cos((m.angle * Math.PI) / 180), C[1] + m.r * Math.sin((m.angle * Math.PI) / 180)];
+const NODE = Object.fromEntries(ARMS.map((m) => [m.id, pos(m)])) as Record<number, Pt>;
 
-/** straight route from the router's records ring to a model's edge */
-function route(id: number, r0 = R_RECORDS + 4): Pt[] {
+/** straight route from the router's inner ring to an arm's edge */
+function route(id: number, r0 = R_INNER + 4): Pt[] {
   const p = NODE[id];
   const dx = p[0] - C[0];
   const dy = p[1] - C[1];
@@ -58,14 +64,14 @@ function route(id: number, r0 = R_RECORDS + 4): Pt[] {
   ];
 }
 
-export type Scenario = 'direct' | 'cascade' | 'portfolio';
-export const SCENARIOS: { key: Scenario; label: string }[] = [
-  { key: 'direct', label: 'Direct dispatch' },
-  { key: 'cascade', label: 'Verified cascade' },
-  { key: 'portfolio', label: 'Portfolio' },
+export type Scenario = 'gain' | 'recover' | 'pay';
+export const SCENARIOS: { key: Scenario; tag: string; label: string }[] = [
+  { key: 'gain', tag: 'Gain', label: 'A question' },
+  { key: 'recover', tag: 'Recover', label: 'A robot scene' },
+  { key: 'pay', tag: 'Pay', label: 'An image prompt' },
 ];
 
-// shared phase times (seconds into a round)
+// shared phase times (seconds into a round); `shift` delays the dispatch where the price is weighed first
 const ARRIVE = [0, 1.05] as const;
 const THINK = [1.05, 1.8] as const;
 const DRAW = [1.75, 2.25] as const;
@@ -73,20 +79,10 @@ const OUT = [2.2, 3.05] as const;
 const WORK = [3.05, 3.35] as const;
 const BACK = [3.35, 4.15] as const;
 
-const PLAN: Record<
-  Scenario,
-  { dur: number; targets: number[]; best?: number; verdict: number; esc?: { draw: number; out: number; work: number; back: number; ok: number }; record: number; fade: number }
-> = {
-  direct: { dur: 6.3, targets: [4], verdict: 4.15, record: 4.45, fade: 5.5 },
-  cascade: {
-    dur: 8.2,
-    targets: [6],
-    verdict: 4.15,
-    esc: { draw: 4.55, out: 5.0, work: 5.75, back: 6.05, ok: 6.8 },
-    record: 7.0,
-    fade: 7.4,
-  },
-  portfolio: { dur: 6.7, targets: [5, 7, 1], best: 7, verdict: 4.15, record: 4.6, fade: 5.9 },
+const PLAN: Record<Scenario, { dur: number; shift: number; settle: number; fade: number }> = {
+  gain: { dur: 6.4, shift: 0, settle: 4.6, fade: 5.6 },
+  recover: { dur: 6.6, shift: 0, settle: 4.6, fade: 5.8 },
+  pay: { dur: 7.8, shift: 0.55, settle: 5.2, fade: 6.6 },
 };
 
 const span = (t: number, a: number, b: number) => Math.min(1, Math.max(0, (t - a) / (b - a)));
@@ -96,7 +92,7 @@ export type FocusWord = 0 | 1 | 2;
 
 interface Props {
   className?: string;
-  /** reports which of combine / spend more / remember the field is acting out */
+  /** reports which of the three questions (gain, recover, pay) the field is acting out */
   onFocus?: (w: FocusWord) => void;
 }
 
@@ -109,52 +105,42 @@ export function CapabilityField({ className = '', onFocus }: Props) {
   const [start, setStart] = useState<{ scenario: number; at: number }>({ scenario: 0, at: 0 });
 
   // which round are we in? scenarios cycle; a click restarts the cycle at the chosen one
-  const timeline = useMemo(() => {
-    const order = SCENARIOS.map((s) => s.key);
-    const total = order.reduce((s, k) => s + PLAN[k].dur, 0);
-    return { order, total };
-  }, []);
-
-  const elapsed = reduced ? 5.2 : Math.max(0, clock - start.at);
+  const total = useMemo(() => SCENARIOS.reduce((s, x) => s + PLAN[x.key].dur, 0), []);
+  const elapsed = reduced ? 4.4 : Math.max(0, clock - start.at);
+  const cycle = Math.floor(elapsed / total);
   let k = start.scenario;
-  let t = elapsed % timeline.total;
-  let round = Math.floor(elapsed / timeline.total) * 3;
-  // walk forward through the cycle from the chosen scenario
+  let t = elapsed % total;
   for (let i = 0; i < 3; i++) {
-    const key = timeline.order[(start.scenario + i) % 3];
+    const key = SCENARIOS[(start.scenario + i) % 3].key;
     if (t < PLAN[key].dur) {
       k = (start.scenario + i) % 3;
       break;
     }
     t -= PLAN[key].dur;
-    round += 1;
   }
   if (reduced) {
-    k = 1;
-    t = 5.2;
+    k = 2;
+    t = 4.9;
   }
-  const scenario = timeline.order[k];
+  const scenario = SCENARIOS[k].key;
   const plan = PLAN[scenario];
+  const sh = plan.shift;
 
-  const records = Math.min(12, ((round % 12) + (t >= plan.record + 0.5 ? 1 : 0)) || 0);
-  const recordFill = span(t, plan.record, plan.record + 0.5);
+  // the robot round alternates between a domain-randomized scene (ME-Dex) and a clean one (PatchWAM)
+  const cleanScene = cycle % 2 === 1;
+  const target = scenario === 'gain' ? 2 : scenario === 'recover' ? (cleanScene ? 10 : 9) : 4;
+  const verdictAt = BACK[1] + sh;
 
-  // phase for captions, equation highlight and the hero's word focus
-  const phase: string = useMemo(() => {
+  const phase: 'arrive' | 'think' | 'price' | 'go' | 'ok' | 'settle' = (() => {
     if (t < ARRIVE[1]) return 'arrive';
     if (t < DRAW[0]) return 'think';
-    if (t >= plan.record) return 'record';
-    if (scenario === 'cascade' && plan.esc) {
-      if (t >= plan.esc.ok) return 'ok';
-      if (t >= plan.esc.draw) return 'escalate';
-      if (t >= plan.verdict) return 'reject';
-    }
-    if (scenario === 'portfolio' && t >= plan.verdict) return 'select';
-    if (t >= plan.verdict) return 'ok';
+    if (scenario === 'pay' && t < DRAW[0] + sh + 0.25) return 'price';
+    if (t >= plan.settle) return 'settle';
+    if (t >= verdictAt) return 'ok';
     return 'go';
-  }, [t, plan, scenario]);
+  })();
 
-  const focusWord: FocusWord = phase === 'record' ? 2 : scenario === 'cascade' && (phase === 'reject' || phase === 'escalate' || phase === 'ok') ? 1 : 0;
+  const focusWord = k as FocusWord;
   const lastFocus = useRef<FocusWord | null>(null);
   useEffect(() => {
     if (lastFocus.current !== focusWord) {
@@ -164,28 +150,34 @@ export function CapabilityField({ className = '', onFocus }: Props) {
   }, [focusWord, onFocus]);
 
   const status = (() => {
-    switch (phase) {
-      case 'arrive':
-        return 'A task arrives with its history';
-      case 'think':
-        return 'Every plan is scored: value minus priced cost';
-      case 'go':
-        return scenario === 'direct'
-          ? 'Direct dispatch: one call to Qwen3-Max'
-          : scenario === 'cascade'
-            ? 'Cascade: try the cheap primary, Kimi-K2.5'
-            : 'Portfolio: three models called together';
-      case 'reject':
-        return 'Rejected by the verifier';
-      case 'escalate':
-        return 'Escalate to the reference, Opus 4.6';
-      case 'select':
-        return 'Keep the best passing answer';
-      case 'ok':
-        return scenario === 'cascade' ? 'Accepted. The fallback was paid for' : 'Accepted. The quality floor holds';
-      default:
-        return 'The outcome is written to the records';
+    if (scenario === 'gain') {
+      return {
+        arrive: 'A question arrives',
+        think: 'Every arm is scored: value minus priced cost',
+        price: '',
+        go: 'This input goes to GPT-6.1 Sol',
+        ok: 'The best arm changes from input to input',
+        settle: 'Per input, the oracle gains 5.4 points over the best fixed arm',
+      }[phase];
     }
+    if (scenario === 'recover') {
+      return {
+        arrive: 'Three camera frames and the robot state arrive',
+        think: 'Each policy is scored by its predicted success',
+        price: '',
+        go: cleanScene ? 'A clean scene goes to PatchWAM' : 'A randomized scene goes to ME-Dex',
+        ok: 'The router follows the better policy in each scene',
+        settle: 'Matching the better policy, with 24% less policy time',
+      }[phase];
+    }
+    return {
+      arrive: 'An image prompt arrives',
+      think: 'At a price, each arm is worth value minus priced cost',
+      price: 'GPT Image 2.5 costs 211 m$ an image',
+      go: 'Grok Imagine 2.0, at 60 m$, wins at this price',
+      ok: 'Inside the quality floor',
+      settle: 'The route cuts image cost by 26% for 0.47 points',
+    }[phase];
   })();
 
   const fade = 1 - span(t, plan.fade, plan.fade + 0.6);
@@ -193,32 +185,28 @@ export function CapabilityField({ className = '', onFocus }: Props) {
 
   // node tones
   const nodeState = (id: number) => {
-    let tone: 'idle' | 'blue' | 'amber' | 'coral' | 'teal' = 'idle';
+    let tone: 'idle' | 'blue' | 'amber' | 'teal' = 'idle';
     let pulse = 0;
     let dim = false;
-    if (plan.targets.includes(id) && t >= DRAW[0] && fade > 0.02) {
-      tone = 'blue';
-      pulse = Math.max(pulseAt(t, WORK[0], 0.8), pulseAt(t, OUT[1] - 0.05, 0.6));
-      if (scenario === 'cascade' && t >= plan.verdict) tone = 'coral';
-      if (scenario === 'portfolio' && t >= plan.verdict) {
-        if (id === plan.best) tone = 'teal';
-        else dim = true;
-      }
+    if (id === target && t >= DRAW[0] + sh && fade > 0.02) {
+      tone = t >= verdictAt ? 'teal' : 'blue';
+      pulse = Math.max(pulseAt(t, WORK[0] + sh, 0.8), pulseAt(t, verdictAt - 0.05, 0.6));
     }
-    if (scenario === 'cascade' && plan.esc && id === 3 && t >= plan.esc.draw && fade > 0.02) {
+    if (scenario === 'pay' && id === 3 && t >= THINK[0] && fade > 0.02) {
       tone = 'amber';
-      pulse = pulseAt(t, plan.esc.work, 0.8);
+      dim = t >= DRAW[0] + sh + 0.3;
+      pulse = pulseAt(t, DRAW[0] + 0.3, 0.7);
     }
-    // the sweep lights each model as it passes
-    const m = MODELS.find((x) => x.id === id)!;
+    // the sweep lights each arm as it passes
+    const m = ARM[id];
     const behind = (((sweep - m.angle) % 360) + 360) % 360;
     const lit = Math.max(0, 1 - behind / 46);
     return { tone, pulse, dim, lit };
   };
 
-  const think = span(t, THINK[0], THINK[0] + 0.35) * (1 - span(t, THINK[1] - 0.1, DRAW[1]));
-  const priceGlow = think > 0.05 || phase === 'think';
-  const floorGlow = phase === 'reject' || phase === 'ok' || phase === 'select';
+  const think = span(t, THINK[0], THINK[0] + 0.35) * (1 - span(t, THINK[1] - 0.1, DRAW[1] + sh));
+  const priceGlow = phase === 'think' || phase === 'price';
+  const floorGlow = scenario === 'pay' && (phase === 'ok' || phase === 'settle');
 
   const arrive = span(t, ARRIVE[0], ARRIVE[1]);
   const ripple = span(t, ARRIVE[1] - 0.05, ARRIVE[1] + 1.1);
@@ -233,40 +221,24 @@ export function CapabilityField({ className = '', onFocus }: Props) {
       comets.push({ pts: path, s: smooth(u) * L, color });
     }
   };
-  for (const id of plan.targets) {
-    const pts = route(id);
-    addComets(pts, OUT[0], OUT[1], 'var(--blue)');
-    addComets(pts, BACK[0], BACK[1], scenario === 'cascade' ? 'var(--coral)' : 'var(--blue)', true);
-  }
-  if (plan.esc) {
-    const pts = route(3);
-    addComets(pts, plan.esc.out, plan.esc.work, 'var(--amber)');
-    addComets(pts, plan.esc.back, plan.esc.ok, 'var(--amber)', true);
-  }
+  addComets(route(target), OUT[0] + sh, OUT[1] + sh, 'var(--blue)');
+  addComets(route(target), BACK[0] + sh, BACK[1] + sh, 'var(--teal)', true);
 
-  const verdict =
-    scenario === 'cascade'
-      ? t >= plan.esc!.ok
-        ? 'ok'
-        : t >= plan.verdict
-          ? 'no'
-          : null
-      : t >= plan.verdict
-        ? 'ok'
-        : null;
-  const verdictPop = verdict ? span(t, verdict === 'no' ? plan.verdict : scenario === 'cascade' ? plan.esc!.ok : plan.verdict, (verdict === 'no' ? plan.verdict : scenario === 'cascade' ? plan.esc!.ok : plan.verdict) + 0.25) : 0;
+  const verdictPop = t >= verdictAt ? span(t, verdictAt, verdictAt + 0.25) : 0;
 
-  // task chip path into the router
+  // input chip path into the router
   const chipPath: Pt[] = [
     [-30, 290],
     [70, 300],
     [190, 314],
-    [C[0] - R_RECORDS - 8, C[1]],
+    [C[0] - R_INNER - 8, C[1]],
   ];
   const chip = pointAt(chipPath, smooth(arrive) * pathLen(chipPath));
+  const chipLabel = scenario === 'gain' ? 'QUESTION' : scenario === 'recover' ? (cleanScene ? 'CLEAN SCENE' : 'RANDOMIZED SCENE') : 'IMAGE PROMPT';
+  const chipW = chipLabel.length * 7.4 + 58;
 
-  const eqHl = phase === 'arrive' ? 'x' : phase === 'think' ? 'g' : phase === 'record' ? 'I' : 'u';
-  const eq = `${eqHl === 'u' ? '\\htmlClass{eq-hl}{u_n}' : 'u_n'}=${eqHl === 'g' ? '\\htmlClass{eq-hl}{g}' : 'g'}(${eqHl === 'x' ? '\\htmlClass{eq-hl}{x_n}' : 'x_n'},\\,${eqHl === 'I' ? '\\htmlClass{eq-hl}{I_n}' : 'I_n'})`;
+  const hl = (body: string, on: boolean) => (on ? `\\htmlClass{eq-hl}{${body}}` : body);
+  const eq = `${hl('u', phase === 'go' || phase === 'ok')}=${hl('g', phase === 'think' || phase === 'price')}(s),\\quad s=${hl('\\sigma', phase === 'think' && scenario === 'recover')}(${hl('x', phase === 'arrive')})`;
 
   const restart = (i: number) => {
     setStart({ scenario: i, at: 0 });
@@ -279,10 +251,15 @@ export function CapabilityField({ className = '', onFocus }: Props) {
         <div className="font-mono text-[11.5px] uppercase tracking-[0.2em] text-ink-2">
           Fig. 00 <span className="ml-3 text-ink-3">The capability field</span>
         </div>
-        <div className="font-mono text-[10.5px] uppercase tracking-[0.18em] text-ink-4">Schematic · the 8 CodeRouterBench models</div>
+        <div className="font-mono text-[10.5px] uppercase tracking-[0.18em] text-ink-4">Schematic · 10 of the matrix’s 23 arms</div>
       </div>
       <div ref={ref} className="relative w-full select-none [container-type:inline-size]" style={{ aspectRatio: `${W} / ${H}` }}>
-        <svg viewBox={`0 0 ${W} ${H}`} className="absolute inset-0 h-full w-full overflow-visible" role="img" aria-label="Animated schematic: a stateful router at the centre of CodeRouterBench's eight models. A task arrives, every plan is scored, and the router dispatches directly, runs a verified cascade that escalates to the reference Opus, or calls a portfolio; the outcome is written to its records.">
+        <svg
+          viewBox={`0 0 ${W} ${H}`}
+          className="absolute inset-0 h-full w-full overflow-visible"
+          role="img"
+          aria-label="Animated schematic: one router among arms of every output type, from language models to image, video and speech generators and robot policies. An input arrives, every arm is scored by value minus priced cost, and the router plays the best: a question goes to a language model, a robot scene to the policy that suits it, and an image prompt to a cheaper generator at a price."
+        >
           <defs>
             <radialGradient id="cf-fade" cx={C[0] / W} cy={C[1] / H} r="0.62">
               <stop offset="0.72" stopColor="#fff" />
@@ -328,51 +305,62 @@ export function CapabilityField({ className = '', onFocus }: Props) {
 
           {/* halo and arrival ripples */}
           <circle cx={C[0]} cy={C[1]} r={170} fill="url(#cf-halo)" />
-          {ripple > 0 && ripple < 1 &&
+          {ripple > 0 &&
+            ripple < 1 &&
             [0, 0.35].map((off) => {
               const u = Math.max(0, Math.min(1, (ripple - off) / (1 - off)));
-              return u > 0 && u < 1 ? (
-                <circle key={off} cx={C[0]} cy={C[1]} r={R_ROUTER + u * 120} fill="none" stroke="var(--blue)" strokeWidth={1.4} opacity={(1 - u) * 0.55} />
-              ) : null;
+              return u > 0 && u < 1 ? <circle key={off} cx={C[0]} cy={C[1]} r={R_ROUTER + u * 120} fill="none" stroke="var(--blue)" strokeWidth={1.4} opacity={(1 - u) * 0.55} /> : null;
             })}
 
-          {/* spokes: during scoring every one of them carries a signal out */}
-          {MODELS.map((m, i) => {
+          {/* spokes: while the router scores, every one of them carries a signal out */}
+          {ARMS.map((m, i) => {
             const pts = route(m.id);
-            const chosen = plan.targets.includes(m.id) || (plan.esc && m.id === 3 && t >= plan.esc.draw);
+            const chosen = m.id === target && t >= DRAW[0] + sh;
             const hovered = hover === m.id;
-            const sig = span(t, THINK[0] + i * 0.04, THINK[0] + 0.45 + i * 0.04);
+            const sig = span(t, THINK[0] + i * 0.035, THINK[0] + 0.45 + i * 0.035);
             return (
               <g key={m.id}>
                 <path d={d(pts)} stroke="var(--line)" strokeWidth={hovered ? 1.6 : 1} opacity={hovered ? 0.95 : 0.42} fill="none" />
-                {think > 0.02 && !chosen && (
-                  <path d={d(slice(pts, 0, sig * 200))} stroke="var(--blue)" strokeWidth={1.2} strokeDasharray="2 5" opacity={think * 0.7} fill="none" />
-                )}
+                {think > 0.02 && !chosen && <path d={d(slice(pts, 0, sig * 200))} stroke="var(--blue)" strokeWidth={1.2} strokeDasharray="2 5" opacity={think * 0.7} fill="none" />}
               </g>
             );
           })}
 
-          {/* chosen routes */}
-          {plan.targets.map((id) => {
-            const pts = route(id);
-            const draw = span(t, DRAW[0], DRAW[1]);
-            const dimmed = scenario === 'portfolio' && t >= plan.verdict && id !== plan.best;
-            const color = scenario === 'cascade' && t >= plan.verdict ? 'var(--coral)' : scenario === 'portfolio' && id === plan.best && t >= plan.verdict ? 'var(--teal)' : 'var(--blue)';
-            return draw > 0 ? (
+          {/* the reference generator is weighed at its price, and passed over */}
+          {scenario === 'pay' && t >= DRAW[0] && (
+            <g opacity={fade}>
               <path
-                key={id}
-                d={d(slice(pts, 0, draw * 400))}
-                stroke={color}
-                strokeWidth={2}
+                d={d(slice(route(3), 0, span(t, DRAW[0], DRAW[0] + 0.35) * 120))}
+                stroke="var(--amber)"
+                strokeWidth={1.8}
+                strokeDasharray="5 5"
                 fill="none"
-                opacity={fade * (dimmed ? 0.25 : 1)}
-                strokeDasharray={scenario === 'cascade' && t >= plan.verdict ? '5 5' : undefined}
-                style={{ transition: 'stroke .35s, opacity .35s' }}
+                opacity={1 - 0.6 * span(t, DRAW[0] + sh + 0.3, DRAW[0] + sh + 0.7)}
               />
-            ) : null;
-          })}
-          {plan.esc && t >= plan.esc.draw && (
-            <path d={d(slice(route(3), 0, span(t, plan.esc.draw, plan.esc.draw + 0.45) * 400))} stroke="var(--amber)" strokeWidth={2} fill="none" opacity={fade} />
+              {t >= DRAW[0] + 0.35 &&
+                (() => {
+                  const p = pointAt(route(3), 120);
+                  const pop = span(t, DRAW[0] + 0.35, DRAW[0] + 0.55);
+                  return (
+                    <g transform={`translate(${p[0]} ${p[1]}) scale(${0.5 + 0.5 * pop})`} opacity={pop}>
+                      <circle r={10} fill="var(--surface)" stroke="var(--amber)" strokeWidth={1.4} />
+                      <path d="M-3.5,-3.5 L3.5,3.5 M3.5,-3.5 L-3.5,3.5" stroke="var(--amber)" strokeWidth={1.6} strokeLinecap="round" />
+                    </g>
+                  );
+                })()}
+            </g>
+          )}
+
+          {/* the chosen route */}
+          {t >= DRAW[0] + sh && (
+            <path
+              d={d(slice(route(target), 0, span(t, DRAW[0] + sh, DRAW[1] + sh) * 400))}
+              stroke={t >= verdictAt ? 'var(--teal)' : 'var(--blue)'}
+              strokeWidth={2}
+              fill="none"
+              opacity={fade}
+              style={{ transition: 'stroke .35s' }}
+            />
           )}
 
           {/* packets */}
@@ -387,60 +375,43 @@ export function CapabilityField({ className = '', onFocus }: Props) {
             );
           })}
 
-          {/* records ring: one arc per round, filled as outcomes are written */}
-          {Array.from({ length: 12 }).map((_, i) => {
-            const a0 = -90 + i * 30 + 4;
-            const a1 = a0 + 22;
-            const arc = (a: number) => [C[0] + R_RECORDS * Math.cos((a * Math.PI) / 180), C[1] + R_RECORDS * Math.sin((a * Math.PI) / 180)];
-            const p0 = arc(a0);
-            const p1 = arc(a1);
-            const filled = i < records;
-            const writing = i === records && recordFill > 0 && recordFill < 1;
-            const path = `M${p0[0]},${p0[1]} A${R_RECORDS},${R_RECORDS} 0 0 1 ${p1[0]},${p1[1]}`;
-            return (
-              <g key={i}>
-                <path d={path} stroke="var(--line-soft)" strokeWidth={3.2} strokeLinecap="round" fill="none" />
-                {(filled || writing) && (
-                  <path d={path} stroke="var(--teal)" strokeWidth={3.2} strokeLinecap="round" fill="none" pathLength={1} strokeDasharray="1 1" strokeDashoffset={filled ? 0 : 1 - recordFill} />
-                )}
-              </g>
-            );
-          })}
-
           {/* the router */}
+          <circle cx={C[0]} cy={C[1]} r={R_INNER} fill="none" stroke="var(--line-soft)" strokeWidth={1.2} strokeDasharray="2 6">
+            {!reduced && <animateTransform attributeName="transform" type="rotate" from={`360 ${C[0]} ${C[1]}`} to={`0 ${C[0]} ${C[1]}`} dur="40s" repeatCount="indefinite" />}
+          </circle>
           <circle cx={C[0]} cy={C[1]} r={R_ROUTER} fill="url(#cf-router)" stroke="var(--accent)" strokeWidth={1.7} />
           <circle cx={C[0]} cy={C[1]} r={R_ROUTER} fill="var(--accent)" opacity={0.08 * (ripple > 0 && ripple < 1 ? 1 - ripple : 0) + (think > 0 ? 0.05 * think : 0)} />
-          <TexLabel x={C[0]} y={C[1] - 2} t="g(x,\,I)" size={31} color="var(--accent)" w={130} h={44} />
+          <TexLabel x={C[0]} y={C[1] - 2} t="g(s)" size={33} color="var(--accent)" w={130} h={46} />
           <g>
-            <rect x={C[0] - 74} y={C[1] + R_RECORDS + 14} width={148} height={20} rx={10} fill="var(--bg)" opacity={0.85} />
-            <text x={C[0]} y={C[1] + R_RECORDS + 28} textAnchor="middle" fontSize={11} letterSpacing={1.8} fill="var(--ink-3)" style={{ fontFamily: 'var(--font-mono)' }}>
-              STATEFUL ROUTER
+            <rect x={C[0] - 80} y={C[1] + R_INNER + 14} width={160} height={20} rx={10} fill="var(--bg)" opacity={0.85} />
+            <text x={C[0]} y={C[1] + R_INNER + 28} textAnchor="middle" fontSize={11} letterSpacing={1.8} fill="var(--ink-3)" style={{ fontFamily: 'var(--font-mono)' }}>
+              OMNI-MODAL ROUTER
             </text>
           </g>
 
           {/* verdict badge */}
-          {verdict && (
+          {verdictPop > 0 && (
             <g transform={`translate(${C[0] + 60} ${C[1] - 60}) scale(${0.4 + 0.6 * verdictPop})`} opacity={fade}>
-              <circle r={13} fill={verdict === 'ok' ? 'var(--teal)' : 'var(--coral)'} />
+              <circle r={13} fill="var(--teal)" />
               <text y={4.5} textAnchor="middle" fontSize={13} fontWeight={700} fill="#fff" style={{ fontFamily: 'var(--font-sans)' }}>
-                {verdict === 'ok' ? '✓' : '✗'}
+                ✓
               </text>
             </g>
           )}
 
-          {/* models */}
-          {MODELS.map((m) => {
+          {/* arms */}
+          {ARMS.map((m) => {
             const [x, y] = NODE[m.id];
             const s = nodeState(m.id);
-            const toneColor =
-              s.tone === 'blue' ? 'var(--blue)' : s.tone === 'amber' ? 'var(--amber)' : s.tone === 'coral' ? 'var(--coral)' : s.tone === 'teal' ? 'var(--teal)' : null;
-            const stroke = toneColor ?? (s.lit > 0.02 ? 'var(--blue)' : m.reference ? 'var(--amber)' : 'var(--line-soft)');
-            const strokeOpacity = toneColor ? 1 : s.lit > 0.02 ? 0.35 + 0.65 * s.lit : m.reference ? 0.7 : 1;
-            const fill = s.tone === 'blue' ? 'var(--blue-wash)' : s.tone === 'amber' ? 'var(--amber-wash)' : s.tone === 'coral' ? 'var(--coral-wash)' : s.tone === 'teal' ? 'var(--teal-wash)' : 'var(--surface)';
+            const toneColor = s.tone === 'blue' ? 'var(--blue)' : s.tone === 'amber' ? 'var(--amber)' : s.tone === 'teal' ? 'var(--teal)' : null;
+            const stroke = toneColor ?? (s.lit > 0.02 ? 'var(--blue)' : 'var(--line-soft)');
+            const strokeOpacity = toneColor ? 1 : s.lit > 0.02 ? 0.35 + 0.65 * s.lit : 1;
+            const fill = s.tone === 'blue' ? 'var(--blue-wash)' : s.tone === 'amber' ? 'var(--amber-wash)' : s.tone === 'teal' ? 'var(--teal-wash)' : 'var(--surface)';
+            const priced = scenario === 'pay' && (m.id === 3 || m.id === 4) && t >= THINK[0] + 0.15;
             return (
               <g
                 key={m.id}
-                opacity={s.dim ? 0.45 : 1}
+                opacity={s.dim ? 0.55 : 1}
                 style={{ transition: 'opacity .35s', cursor: 'pointer' }}
                 onMouseEnter={() => setHover(m.id)}
                 onMouseLeave={() => setHover(null)}
@@ -449,24 +420,36 @@ export function CapabilityField({ className = '', onFocus }: Props) {
                 {s.pulse > 0.01 && <circle cx={x} cy={y} r={R_NODE + 4 + (1 - s.pulse) * 16} fill="none" stroke={toneColor ?? 'var(--blue)'} strokeWidth={1.5} opacity={s.pulse * 0.8} />}
                 {s.lit > 0.02 && !toneColor && <circle cx={x} cy={y} r={R_NODE + 7} fill="var(--blue)" opacity={0.07 * s.lit} />}
                 <circle cx={x} cy={y} r={R_NODE} fill={fill} stroke={stroke} strokeOpacity={strokeOpacity} strokeWidth={toneColor || hover === m.id ? 1.9 : 1.4} style={{ transition: 'fill .35s' }} />
-                <text x={x} y={y + 4.5} textAnchor="middle" fontSize={13} fill={toneColor ?? 'var(--ink-2)'} style={{ fontFamily: 'var(--font-mono)' }}>
-                  {String(m.id).padStart(2, '0')}
-                </text>
-                <text x={x} y={y + R_NODE + 21} textAnchor="middle" fontSize={10.5} letterSpacing={1.5} fill={toneColor ?? 'var(--ink-3)'} style={{ fontFamily: 'var(--font-mono)' }}>
+                <PoolIcon pool={m.pool} x={x} y={y} color={toneColor ?? 'var(--ink-2)'} />
+                <text x={x} y={y + R_NODE + 20} textAnchor="middle" fontSize={10.5} letterSpacing={1.2} fill={toneColor ?? 'var(--ink-3)'} style={{ fontFamily: 'var(--font-mono)' }}>
                   {m.short}
                 </text>
+                {priced && (
+                  <text
+                    x={x}
+                    y={y - R_NODE - 9}
+                    textAnchor="middle"
+                    fontSize={11}
+                    fontWeight={600}
+                    fill={m.id === 3 ? 'var(--amber)' : 'var(--ink-2)'}
+                    opacity={fade * span(t, THINK[0] + 0.15, THINK[0] + 0.5)}
+                    style={{ fontFamily: 'var(--font-mono)' }}
+                  >
+                    {m.id === 3 ? '211 m$' : '60 m$'}
+                  </text>
+                )}
               </g>
             );
           })}
 
-          {/* the task, flying in */}
+          {/* the input, flying in */}
           {arrive > 0 && arrive < 1 && (
             <g transform={`translate(${chip[0]} ${chip[1]}) scale(${1 - 0.55 * smooth(span(arrive, 0.75, 1))})`} opacity={Math.min(1, arrive * 4) * (1 - span(arrive, 0.85, 1))}>
-              <rect x={-44} y={-16} width={88} height={32} rx={16} fill="var(--surface)" stroke="var(--blue)" strokeWidth={1.4} />
-              <text x={-12} y={4} textAnchor="middle" fontSize={10.5} letterSpacing={1.4} fill="var(--ink-3)" style={{ fontFamily: 'var(--font-mono)' }}>
-                TASK
+              <rect x={-chipW / 2} y={-16} width={chipW} height={32} rx={16} fill="var(--surface)" stroke="var(--blue)" strokeWidth={1.4} />
+              <text x={-chipW / 2 + 16} y={4} fontSize={10.5} letterSpacing={1.4} fill="var(--ink-3)" style={{ fontFamily: 'var(--font-mono)' }}>
+                {chipLabel}
               </text>
-              <TexLabel x={22} y={0} t="x_n" size={16} color="var(--blue)" w={34} h={28} />
+              <TexLabel x={chipW / 2 - 20} y={0} t="x" size={16} color="var(--blue)" w={30} h={28} />
             </g>
           )}
         </svg>
@@ -492,8 +475,8 @@ export function CapabilityField({ className = '', onFocus }: Props) {
               transition={{ type: 'spring', stiffness: 420, damping: 30 }}
               className="rounded-2xl border border-rule bg-surface/95 p-3.5 shadow-[var(--shadow-lg)] backdrop-blur-md"
             >
-              <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-accent">{MODELS[hover - 1].name}</div>
-              <p className="mt-1.5 font-serif text-[13.5px] leading-snug text-ink-2">{MODELS[hover - 1].fact}</p>
+              <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-accent">{ARM[hover].name}</div>
+              <p className="mt-1.5 font-serif text-[13.5px] leading-snug text-ink-2">{ARM[hover].fact}</p>
             </motion.div>
           </div>
         )}
@@ -532,7 +515,9 @@ export function CapabilityField({ className = '', onFocus }: Props) {
               onClick={() => restart(i)}
               className={`group relative overflow-hidden rounded-xl border px-3 py-2 text-left transition-colors ${active ? 'border-accent/40 bg-surface' : 'border-rule bg-transparent hover:border-rule-2'}`}
             >
-              <span className={`block font-mono text-[10px] uppercase tracking-[0.16em] ${active ? 'text-accent' : 'text-ink-4'}`}>0{i + 1}</span>
+              <span className={`block font-mono text-[10px] uppercase tracking-[0.16em] ${active ? 'text-accent' : 'text-ink-4'}`}>
+                0{i + 1} · {s.tag}
+              </span>
               <span className={`block font-sans text-[13px] font-medium ${active ? 'text-ink' : 'text-ink-3 group-hover:text-ink-2'}`}>{s.label}</span>
               <span className="absolute inset-x-0 bottom-0 h-[2px] bg-rule">
                 <span className="block h-full origin-left bg-accent" style={{ transform: `scaleX(${prog})` }} />

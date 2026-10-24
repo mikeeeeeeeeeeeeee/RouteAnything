@@ -8,15 +8,17 @@ import { NotationDrawer } from '@/components/ui/NotationDrawer';
 import { SymHost } from '@/components/math/Sym';
 import GradualBlur from '@/components/reactbits/GradualBlur/GradualBlur';
 import { Hero } from '@/sections/Hero';
-import { Problem } from '@/sections/Problem';
-import { Accounting } from '@/sections/Accounting';
-import { Price } from '@/sections/Price';
+import { Overview } from '@/sections/Overview';
+import { Value } from '@/sections/Value';
+import { Optimal } from '@/sections/Optimal';
+import { Ladder } from '@/sections/Ladder';
+import { Targets } from '@/sections/Targets';
 import { Certificate } from '@/sections/Certificate';
-import { Reference } from '@/sections/Reference';
 import { Findings } from '@/sections/Findings';
-import { Combine } from '@/sections/Combine';
-import { Spend } from '@/sections/Spend';
-import { Remember } from '@/sections/Remember';
+import { Matrix } from '@/sections/Matrix';
+import { Headroom } from '@/sections/Headroom';
+import { Routers } from '@/sections/Routers';
+import { Price } from '@/sections/Price';
 import { Cite } from '@/sections/Cite';
 
 export default function App() {
@@ -28,17 +30,19 @@ export default function App() {
       <MarginToc />
       <main>
         <Hero />
-        <Problem />
-        <PartDivider id="part-1" part="Part I" title="The accounting" sub="One identity, one price, one certificate, and the reference's two roles." />
-        <Accounting />
-        <Price />
+        <Overview />
+        <PartDivider id="part-1" part="Part I" title="A router's value" sub="One rule at a price, a ladder of what a router can reach, a training target, and a certified floor." />
+        <Value />
+        <Optimal />
+        <Ladder />
+        <Targets />
         <Certificate />
-        <Reference />
-        <PartDivider id="part-2" part="Part II" title="The evidence" sub="What to combine, when to spend more, what to remember: tested on CodeRouterBench and RouterBench." />
+        <PartDivider id="part-2" part="Part II" title="The evidence" sub="One outcome matrix across seven output types, and two priced testbeds for code and text." />
         <Findings />
-        <Combine />
-        <Spend />
-        <Remember />
+        <Matrix />
+        <Headroom />
+        <Routers />
+        <Price />
         <Cite />
       </main>
       <NotationDrawer open={notation} onClose={() => setNotation(false)} />

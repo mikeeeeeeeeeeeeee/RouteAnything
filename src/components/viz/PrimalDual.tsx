@@ -264,7 +264,7 @@ export function PrimalDual() {
               <>
                 The floor binds. The optimum plays{' '}
                 <span className="text-ink" dangerouslySetInnerHTML={{ __html: tex(mixLabel) }} />
-                {o.hi.id !== o.lo.id ? ', randomising in this one state, as part (iii) allows.' : interval ? ': the floor sits on a vertex, so a whole interval of prices supports it.' : '.'}
+                {o.hi.id !== o.lo.id ? ', randomising in this one state.' : interval ? ': the floor sits on a vertex, so a whole interval of prices supports it.' : '.'}
               </>
             ) : (
               <>The floor is slack: the unconstrained optimum already meets it, so κ = 0 and the price is η⋆ itself.</>

@@ -6,15 +6,16 @@ import { tex } from '@/lib/tex';
 import { FigTag, FlowEdge, FlowNode, Packet, type Tone } from './flow';
 import { TexLabel } from './svg';
 
-// Fig. 2. An action is a model call plus an execution rule: one call, a sequence of attempts, or a
-// parallel portfolio. Packets are tasks; the verifier in the cascade accepts about three in five.
+// An arm can be a whole execution plan: one call, a cascade that verifies a cheap primary and falls
+// back to the reference, or a plan that retries after a failure and shows the retry the failing
+// tests. Packets are tasks; the verifier accepts about three in five, the tests pass about half.
 
 const W = 900;
 const H = 440;
 const R = 46;
 
-type Mode = 'direct' | 'cascade' | 'portfolio';
-type NodeId = 'task' | 'm1' | 'gate' | 'answer' | 'ref' | 'mA' | 'mC';
+type Mode = 'direct' | 'cascade' | 'retry';
+type NodeId = 'task' | 'm1' | 'gate' | 'answer' | 'ref' | 'retry';
 
 interface NodeSpec {
   x: number;
@@ -36,20 +37,19 @@ const LAYOUT: Record<Mode, Partial<Record<NodeId, NodeSpec>>> = {
     answer: { x: 770, y: 96, label: 'Answer', caption: { text: 'value', tex: 'V', at: 'right' } },
     ref: { x: 770, y: 360, label: 'Reference', caption: { text: 'pay', tex: 'C_B', at: 'right' } },
   },
-  portfolio: {
-    task: { x: 92, y: 220, label: 'Task', caption: { text: 'state', tex: 'x' } },
-    mA: { x: 352, y: 86, label: 'Model A', caption: { text: 'capability 01' } },
-    m1: { x: 352, y: 220, label: 'Model B', caption: { text: 'capability 02' } },
-    mC: { x: 352, y: 354, label: 'Model C', caption: { text: 'capability 03' } },
-    gate: { x: 600, y: 220, label: 'Select', caption: { text: 'full cost' } },
-    answer: { x: 805, y: 220, label: 'Answer', caption: { text: 'value', tex: 'V' } },
+  retry: {
+    task: { x: 105, y: 245, label: 'Task', caption: { text: 'state', tex: 'x' } },
+    m1: { x: 290, y: 245, label: 'Attempt', caption: { text: 'cost', tex: 'a_1' } },
+    gate: { x: 475, y: 245, label: 'Tests', caption: { tex: 'H\\in\\{0,1\\}' } },
+    answer: { x: 770, y: 96, label: 'Answer', caption: { text: 'value', tex: 'V', at: 'right' } },
+    retry: { x: 770, y: 360, label: 'Retry', caption: { text: 'cost', tex: 'a_2', at: 'right' } },
   },
 };
 
 const MODES: { key: Mode; label: string }[] = [
   { key: 'direct', label: 'Direct dispatch' },
   { key: 'cascade', label: 'Verified cascade' },
-  { key: 'portfolio', label: 'Model portfolio' },
+  { key: 'retry', label: 'Retry with feedback' },
 ];
 
 const C45 = Math.SQRT1_2;
@@ -95,20 +95,19 @@ const EDGES: Record<Mode, EdgeSpec[]> = {
     { id: 'gate-ref', from: 'gate', to: 'ref', kind: 'diag-flat', label: 'fall back' },
     { id: 'ref-answer', from: 'ref', to: 'answer', kind: 'vertical' },
   ],
-  portfolio: [
-    { id: 'task-mA', from: 'task', to: 'mA', kind: 'diag-flat' },
+  retry: [
     { id: 'task-m1', from: 'task', to: 'm1', kind: 'straight' },
-    { id: 'task-mC', from: 'task', to: 'mC', kind: 'diag-flat' },
-    { id: 'mA-gate', from: 'mA', to: 'gate', kind: 'flat-diag' },
     { id: 'm1-gate', from: 'm1', to: 'gate', kind: 'straight' },
-    { id: 'mC-gate', from: 'mC', to: 'gate', kind: 'flat-diag' },
-    { id: 'gate-answer', from: 'gate', to: 'answer', kind: 'straight' },
+    { id: 'gate-answer', from: 'gate', to: 'answer', kind: 'straight', label: 'accept' },
+    { id: 'gate-retry', from: 'gate', to: 'retry', kind: 'diag-flat', label: 'retry' },
+    { id: 'retry-answer', from: 'retry', to: 'answer', kind: 'vertical' },
   ],
 };
 
-const SPAWN: Record<Mode, number> = { direct: 1.05, cascade: 1.25, portfolio: 1.7 };
+const SPAWN: Record<Mode, number> = { direct: 1.05, cascade: 1.25, retry: 1.25 };
 const HOLD = 0.24;
 const ACCEPT = 0.6;
+const PASS = 0.5;
 const LEAD = 0.85; // edges draw in before the first packet
 
 type Step = { edge: string; dur: number } | { hold: NodeId; dur: number; tone?: Tone };
@@ -158,18 +157,22 @@ export function ExecutionPlans() {
             ],
       ];
     }
-    // portfolio: three parallel calls of equal duration, then one selected answer
-    const pick = ['mA', 'm1', 'mC'][Math.floor(hash01(j, 3) * 3)];
-    const leg = 0.78;
-    return (['mA', 'm1', 'mC'] as NodeId[]).map((m) => {
-      const steps: Step[] = [
-        { edge: `task-${m}`, dur: leg },
-        { hold: m, dur: HOLD },
-        { edge: `${m}-gate`, dur: leg },
-      ];
-      if (m === pick) steps.push({ hold: 'gate', dur: HOLD, tone: 'teal' }, { edge: 'gate-answer', dur: travel(edgeById['gate-answer'].L) }, { hold: 'answer', dur: 0.1 });
-      return steps;
-    });
+    // retry: a failed first attempt is tried again, and the retry sees the failing tests
+    const pass = hash01(j, 11) < PASS;
+    return [
+      pass
+        ? [E('task-m1'), { hold: 'm1', dur: HOLD }, E('m1-gate'), { hold: 'gate', dur: HOLD, tone: 'teal' }, E('gate-answer'), { hold: 'answer', dur: 0.1 }]
+        : [
+            E('task-m1'),
+            { hold: 'm1', dur: HOLD },
+            E('m1-gate'),
+            { hold: 'gate', dur: HOLD, tone: 'coral' },
+            E('gate-retry'),
+            { hold: 'retry', dur: HOLD, tone: 'blue' },
+            E('retry-answer'),
+            { hold: 'answer', dur: 0.1 },
+          ],
+    ];
   };
 
   // walk every live task to find packets and node pulses
@@ -193,13 +196,13 @@ export function ExecutionPlans() {
               const e = edgeById[st.edge];
               const u = (local - at) / st.dur;
               const eased = u < 0.5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2;
-              packets.push({ pts: e.pts, s: eased * e.L + 10, color: st.edge.startsWith('ref') || st.edge === 'gate-ref' ? 'var(--amber)' : 'var(--blue)' });
+              packets.push({ pts: e.pts, s: eased * e.L + 10, color: st.edge.startsWith('ref') || st.edge === 'gate-ref' ? 'var(--amber)' : st.edge === 'gate-retry' || st.edge === 'retry-answer' ? 'var(--teal)' : 'var(--blue)' });
             }
           } else if (local >= at && local < at + 0.75) {
             const p = 1 - (local - at) / 0.75;
             const prev = pulses[st.hold];
             if (!prev || prev.p < p) pulses[st.hold] = { p, tone: st.tone ?? 'blue' };
-            if (st.hold === 'gate' && mode === 'cascade') badges.push({ node: 'gate', ok: st.tone === 'teal', p });
+            if (st.hold === 'gate' && mode !== 'direct') badges.push({ node: 'gate', ok: st.tone === 'teal', p });
           }
           at = end;
         }
@@ -209,6 +212,7 @@ export function ExecutionPlans() {
     const done = Math.max(0, Math.floor((local - 3.4) / SPAWN[mode]) + 1);
     delivered = done;
     if (mode === 'cascade') for (let j = 0; j < done; j++) if (hash01(j, 7) >= ACCEPT) fallbacks++;
+    if (mode === 'retry') for (let j = 0; j < done; j++) if (hash01(j, 11) >= PASS) fallbacks++;
   }
 
   const select = (m: Mode) => {
@@ -220,13 +224,13 @@ export function ExecutionPlans() {
   const formula: Record<Mode, string> = {
     direct: 'V=Y_M,\\qquad D=C_M',
     cascade: 'V=H\\,Y_P+(1-H)\\,Y_B,\\qquad D=A+(1-H)\\,C_B',
-    portfolio: 'V=Y_{\\text{selected}}\\ (\\text{else } Y_B),\\qquad D=\\textstyle\\sum_{m\\in S} C_m\\ (+\\,C_B)',
+    retry: 'V=H\\,Y_1+(1-H)\\,Y_2,\\qquad D=a_1+(1-H)\\,a_2',
   };
   const n = (k: number, one: string, many = `${one}s`) => `${k} ${k === 1 ? one : many}`;
   const tally: Record<Mode, string> = {
     direct: `${n(delivered, 'task')} · ${n(delivered, 'call')}`,
     cascade: `${n(delivered, 'task')} · ${n(delivered, 'primary call')} · ${n(fallbacks, 'reference call')}`,
-    portfolio: `${n(delivered, 'task')} · ${n(delivered * 3, 'member call')}`,
+    retry: `${n(delivered, 'task')} · ${n(delivered, 'first attempt')} · ${n(fallbacks, 'retry', 'retries')}`,
   };
   const smearTarget = hoverTab ?? mode;
 
@@ -281,13 +285,13 @@ export function ExecutionPlans() {
               return (
                 <motion.g key={`${mode}-${e.id}-label`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.7 }}>
                   <TexLabel
-                    x={p[0] + (up ? -14 : 18)}
+                    x={p[0] + (up ? -14 : mode === 'retry' ? -12 : 18)}
                     y={p[1] + (up ? -14 : 18)}
-                    t={up ? 'H=1' : 'H=0'}
-                    anchor={up ? 'end' : 'start'}
+                    t={up ? 'H=1' : mode === 'retry' ? 'H=0,\\ \\text{with the failing tests}' : 'H=0'}
+                    anchor={up || mode === 'retry' ? 'end' : 'start'}
                     size={14}
-                    color={up ? 'var(--teal)' : 'var(--amber)'}
-                    w={60}
+                    color={up ? 'var(--teal)' : mode === 'retry' ? 'var(--ink-2)' : 'var(--amber)'}
+                    w={up ? 60 : 180}
                   />
                 </motion.g>
               );
@@ -298,7 +302,7 @@ export function ExecutionPlans() {
           ))}
 
           <AnimatePresence>
-            {(['task', 'mA', 'm1', 'mC', 'gate', 'answer', 'ref'] as NodeId[]).map((id) => {
+            {(['task', 'm1', 'gate', 'answer', 'ref', 'retry'] as NodeId[]).map((id) => {
               const spec = layout[id];
               if (!spec) return null;
               const pulse = pulses[id];

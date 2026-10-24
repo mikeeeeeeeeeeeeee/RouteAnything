@@ -17,10 +17,10 @@ export function FloorWaffles() {
   const [hover, setHover] = useState<string | null>(null);
 
   return (
-    <div ref={ref} className="grid grid-cols-1 gap-8 md:grid-cols-3">
+    <div ref={ref} className="grid grid-cols-1 gap-8 md:grid-cols-2">
       {FLOOR_SPLITS.map((f, fi) => {
         const share = f.held / f.of;
-        const tone = f.key === 'certified' ? 'var(--teal)' : f.key === 'rounded' ? 'var(--amber)' : 'var(--coral)';
+        const tone = f.key === 'certified' ? 'var(--teal)' : 'var(--coral)';
         return (
           <div
             key={f.key}

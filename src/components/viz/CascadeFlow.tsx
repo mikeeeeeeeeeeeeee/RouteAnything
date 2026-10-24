@@ -8,7 +8,7 @@ import { useTokens } from '@/theme/tokens';
 import { FigTag, FlowEdge, FlowNode, Packet, type Tone } from './flow';
 import { mono } from './svg';
 
-// Eq. (5) acted out. Every task pays the primary's cost A; a rejected one also pays C_B and gets the
+// Eq. (3) acted out. Every task pays the primary's cost A; a rejected one also pays C_B and gets the
 // reference's answer. V - Y_B = H (Y_P - Y_B), so quality is lost only through false accepts.
 // Illustration: the reference is right on every task, the primary on 45%, A = 0.1 C_B.
 
@@ -210,7 +210,7 @@ export function CascadeFlow() {
       </div>
       <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
         <FigTag>Reference-fallback cascade</FigTag>
-        <p className="font-sans text-[12.5px] text-ink-3">Stricter checks buy quality with fallbacks: the verifier is itself a point on a cost–quality menu (Finding 5).</p>
+        <p className="font-sans text-[12.5px] text-ink-3">Stricter checks buy quality with fallbacks: the verifier is itself a point on a cost–quality menu (Finding 7).</p>
       </div>
     </div>
   );

@@ -3,26 +3,41 @@ import GlareHover from '@/components/reactbits/GlareHover/GlareHover';
 import { InfRecLogo } from '@/components/ui/TopBar';
 import { toast } from '@/components/ui/toast';
 import { M } from '@/components/math/M';
-import { bibtex, paper } from '@/data/paper';
+import { authors, bibtex, paper } from '@/data/paper';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useTokens } from '@/theme/tokens';
 
+const RULES = [
+  {
+    title: 'Compare arms on the same inputs.',
+    body: 'Measure gains against the matched best fixed arm, chosen and evaluated under the same fallback as the router.',
+  },
+  {
+    title: 'Train routers on per-arm outcomes.',
+    body: 'Look for headroom inside task types: a router that learns mainly the type recovers the best fixed arm and little more.',
+  },
+  {
+    title: 'Fix the reference and the tolerance before ranking routes.',
+    body: 'They set the price. Then certify the floor on independent inputs, because a fitted floor need not hold on new ones.',
+  },
+];
+
 const LIMITS = [
   {
-    title: 'The state law is taken as given.',
-    body: 'Theorem 2 and Proposition 3 do not cover policy-dependent state transitions, and the memory results evaluate a given writer.',
+    title: 'Some modalities are missing.',
+    body: 'The matrix has no video understanding, audio understanding or 3D generation benchmarks, and seven understanding benchmarks enter only the headroom analysis, because no router has yet been evaluated on them.',
   },
   {
-    title: 'Certification costs reference calls.',
-    body: 'The floor is certified offline and needs the reference’s outcome on every certification task, so a deployment pays to run the reference there.',
+    title: 'Router gains are small next to their intervals.',
+    body: 'Learned routers were trained with one or four seeds, and most of their gains are small next to their intervals.',
   },
   {
-    title: 'Most evidence is replay on code.',
-    body: 'Replay uses oracle acceptance and benchmark-provenance states; the online studies reuse recorded Opus outcomes, and the memory study is semi-synthetic.',
+    title: 'Prices are recorded in only some places.',
+    body: 'Prices exist for image and speech generation, CodeRouterBench and RouterBench; the other matrix results are quality-only, and robot cost is policy time.',
   },
   {
-    title: 'Ratios depend on prices and the yardstick.',
-    body: 'In sequential seconds the dollar-optimal policies reach only 0.71× Opus’s efficiency, and the zero-loss multiplier is 25.5× against Opus but 3.2× against a per-cell best-model yardstick.',
+    title: 'The law of states is taken as given.',
+    body: 'The theory does not cover states that depend on the router’s own earlier choices, such as SciCode steps that contain a model’s earlier code, and certification needs the reference’s outcome on every certification input.',
   },
 ];
 
@@ -38,6 +53,26 @@ export function Cite() {
   return (
     <section id="cite" className="relative scroll-mt-20 border-t border-rule py-24 md:py-32">
       <div className="mx-auto max-w-[1180px] px-5 md:px-8">
+        <div className="mb-20">
+          <div className="smallcaps text-[10.5px] text-accent">Conclusion</div>
+          <h2 className="display mt-3 max-w-[820px] text-[clamp(34px,4vw,52px)] text-ink">Three rules follow.</h2>
+          <p className="mt-5 max-w-[760px] font-serif text-[17px] leading-[1.7] text-ink-2">
+            Across text, images, video, speech, code and robots, the best arm changes from input to input, and the per-input oracle sits
+            5.4 points above the best fixed arm per benchmark. Most of that headroom lies within task types. Where the input shows which arm
+            will win, as camera frames do for robot policies, a router trained on per-arm outcomes follows it. Routing pays most reliably
+            through price: when arms are close in quality and far apart in cost, the reference and the quality tolerance fix the price, and a
+            finite-sample test certifies the quality floor.
+          </p>
+          <ol className="mt-10 grid grid-cols-1 gap-5 md:grid-cols-3">
+            {RULES.map((r, i) => (
+              <li key={r.title} className="rounded-[22px] border border-rule bg-surface p-6 shadow-[var(--shadow)]">
+                <span className="font-display text-[44px] font-semibold leading-none text-accent [font-variant-numeric:lining-nums]">{i + 1}</span>
+                <div className="mt-3 font-sans text-[15.5px] font-semibold leading-snug text-ink">{r.title}</div>
+                <p className="mt-2 font-serif text-[15px] leading-[1.6] text-ink-2">{r.body}</p>
+              </li>
+            ))}
+          </ol>
+        </div>
         <div className="grid grid-cols-1 gap-14 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
           <div>
             <div className="smallcaps text-[10.5px] text-accent">Limitations</div>
@@ -57,9 +92,9 @@ export function Cite() {
 
           <div>
             <div className="smallcaps text-[10.5px] text-accent">Cite</div>
-            <h2 className="display mt-3 text-[clamp(34px,4vw,48px)] text-ink">If the accounting helps you.</h2>
+            <h2 className="display mt-3 text-[clamp(34px,4vw,48px)] text-ink">If the matrix or the theory helps you.</h2>
             <p className="mt-4 font-serif text-[16px] leading-relaxed text-ink-3">
-              A placeholder entry until the arXiv identifier is assigned.
+              A placeholder entry until the paper is posted and its arXiv identifier is assigned.
             </p>
             <div className="mt-7">
               <GlareHover
@@ -76,7 +111,7 @@ export function Cite() {
               >
                 <div className="w-full min-w-0 p-6">
                   <div className="mb-4 flex items-center justify-between">
-                    <span className="font-mono text-[11px] text-ink-3">infrec2026routeanything.bib</span>
+                    <span className="font-mono text-[11px] text-ink-3">zhou2026routeanything.bib</span>
                     <ClickSpark sparkColor={[tk.accent, tk.amber, tk.blue]} sparkCount={10} sparkRadius={34} sparkSize={12} className="!h-auto !w-auto">
                       <button
                         type="button"
@@ -102,13 +137,14 @@ export function Cite() {
           <div>
             <InfRecLogo className="h-8 w-auto" />
             <p className="mt-4 max-w-[520px] font-serif text-[14.5px] leading-relaxed text-ink-3">
-              {paper.title}: {paper.subtitle}. {paper.team}, {paper.date}. Figures marked <em>Paper data</em> are redrawn from the
-              paper&rsquo;s tables; figures marked <em>Schematic</em> illustrate a result with made-up numbers.
+              {paper.title}: {paper.subtitle}. {authors.map((a) => a.name).join(', ')}. {paper.date}. Figures marked <em>Paper data</em> are
+              redrawn from the paper&rsquo;s tables and figures; figures marked <em>Schematic</em> illustrate a result with made-up numbers.
+              The omni-modal outcome matrix is proprietary and is not released.
             </p>
           </div>
           <div className="flex flex-col items-start gap-2 md:items-end">
             <span className="font-display text-[22px] italic text-ink-2">
-              <M>{'\\eta-\\eta_B=\\frac{Q+\\eta_B\\mathcal S}{\\mathbb E[D]}'}</M>
+              <M>{'g(s)\\in\\arg\\max_u\\,v(s,u)-\\lambda\\,c(s,u)'}</M>
             </span>
             <span className="font-sans text-[12px] text-ink-4">Interactive figures built with React Bits, KaTeX and Motion.</span>
           </div>

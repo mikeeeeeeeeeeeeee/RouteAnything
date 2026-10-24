@@ -1,7 +1,7 @@
 import { useMemo, useRef, useState } from 'react';
 import { motion } from 'motion/react';
 import RubberSegment from '@/components/reactbits/RubberSegment/RubberSegment';
-import { POLICIES, POLICIES_EXTRA, type PolicyRow } from '@/data/results';
+import { NINE_DIMS, POLICIES, type PolicyRow } from '@/data/results';
 import { useInView } from '@/lib/hooks';
 import { useTokens } from '@/theme/tokens';
 import { TexLabel, logScale, mono, sans, scale } from './svg';
@@ -29,11 +29,6 @@ const GROUP_COLOR: Record<PolicyRow['group'], string> = {
 
 type Partition = '21' | '9';
 
-const NINE: Record<string, PolicyRow> = {
-  '21 cells, unconstrained': { ...POLICIES_EXTRA[1], label: '9 dims, unconstrained' },
-  '21 cells, ε = 0': { ...POLICIES_EXTRA[2], label: '9 dims, ε = 0' },
-  '21 cells, ε = 0.01': { ...POLICIES_EXTRA[4], label: '9 dims, ε = 0.01' },
-};
 
 export function PolicyForest() {
   const tk = useTokens();
@@ -42,7 +37,11 @@ export function PolicyForest() {
   const [part, setPart] = useState<Partition>('21');
   const [hover, setHover] = useState<number | null>(null);
 
-  const rows = useMemo(() => POLICIES.map((r) => (part === '9' && NINE[r.label] ? NINE[r.label] : r)), [part]);
+  // the 9-dimension partition reports only the unconstrained and zero-loss policies (Table 10)
+  const rows = useMemo(
+    () => (part === '9' ? POLICIES.filter((r) => r.group !== 'ours' || NINE_DIMS[r.label]).map((r) => NINE_DIMS[r.label] ?? r) : POLICIES),
+    [part]
+  );
   const W = LABEL_W + PANELS.reduce((s, p) => s + p.w + PANEL_GAP, 0);
   const H = TOP + rows.length * ROW_H + 46;
   let x0 = LABEL_W;

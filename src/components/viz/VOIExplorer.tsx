@@ -8,7 +8,7 @@ import { useTokens } from '@/theme/tokens';
 import { BarList } from './BarList';
 import { TexLabel, mono, scale } from './svg';
 
-// Eq. (9). Two actions, quality preserved: attempt the primary (cost a, then b on failure) or fall
+// Eq. (12), Proposition 9. Two actions, quality preserved: attempt the primary (cost a, then b on failure) or fall
 // back directly (cost b). A binary signal Z moves the success probability s to s0 or s1; the cost
 // with the signal is the chord of the no-signal curve between them. Perfect information bounds what
 // any signal can save, and that bound never reaches a, so a signal that costs more than an attempt
@@ -169,7 +169,7 @@ function Ctl({ label, value, children }: { label: string; value: string; childre
   );
 }
 
-/** Table 9: the released routers' capture with and without the task type. */
+/** Table 16: the released routers' capture with and without the task type. */
 export function SignalCapture() {
   const tk = useTokens();
   const [mode, setMode] = useState<'unknown' | 'given'>('unknown');

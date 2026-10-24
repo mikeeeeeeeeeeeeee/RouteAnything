@@ -91,3 +91,18 @@ export function WithMargin({ note, children }: { note: ReactNode; children: Reac
     </div>
   );
 }
+
+/** A numbered sub-chapter inside a section, e.g. "8.2 Routers that read the scene". */
+export function Sub({ id, n, title, kicker }: { id: string; n: string; title: string; kicker: string }) {
+  return (
+    <div id={id} className="scroll-mt-24 md:ml-[190px]">
+      <div className="flex items-baseline gap-4 border-t border-rule pt-6">
+        <span className="font-display text-[34px] font-semibold leading-none text-accent [font-variant-numeric:lining-nums]">{n}</span>
+        <div>
+          <div className="smallcaps text-[10.5px] text-ink-3">{kicker}</div>
+          <h3 className="mt-1 font-display text-[30px] font-semibold leading-tight text-ink">{title}</h3>
+        </div>
+      </div>
+    </div>
+  );
+}

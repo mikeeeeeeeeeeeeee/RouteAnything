@@ -7,8 +7,8 @@ import { tex } from '@/lib/tex';
 import { useTokens } from '@/theme/tokens';
 import { TexLabel, mono, sans, scale } from './svg';
 
-// Table 2: the same hidden-test-written record store against two priors. Bars: probing-predicted
-// gain (Eq. 10, hollow) and realised gain on test with its interval (solid).
+// Table 17: the same hidden-test-written record store against two priors. Bars: probing-predicted
+// gain (Eq. 13, hollow) and realised gain on test with its interval (solid).
 
 export function MemoryPriors() {
   const ref = useRef<HTMLDivElement>(null);
@@ -27,7 +27,7 @@ export function MemoryPriors() {
               <span className="font-sans text-[12px] text-ink-3">{pos ? 'memory gains' : 'memory loses'}</span>
             </div>
             {[
-              { k: 'pred', v: p.predicted, label: 'predicted, Eq. (10)', solid: false, ci: null as null | [number, number] },
+              { k: 'pred', v: p.predicted, label: 'predicted, Eq. (13)', solid: false, ci: null as null | [number, number] },
               { k: 'real', v: p.realized[0], label: 'realised on test', solid: true, ci: [p.realized[1], p.realized[2]] as [number, number] },
             ].map((r, j) => (
               <div key={r.k} className="grid grid-cols-[128px_minmax(0,1fr)] items-center gap-3 py-1">
@@ -173,7 +173,7 @@ export function SignAgreement() {
   const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, '-60px', true);
   const rows = [
-    { label: 'Eq. (10), predicted on probing', right: MEMORY.signAgreement.right, color: 'var(--blue)' },
+    { label: 'Eq. (13), predicted on probing', right: MEMORY.signAgreement.right, color: 'var(--blue)' },
     { label: 'always predict improvement', right: MEMORY.alwaysImprove.right, color: 'var(--slate)' },
   ];
   return (
