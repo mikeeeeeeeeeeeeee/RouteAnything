@@ -14,7 +14,9 @@ remembered.
 React 19 + Vite + Tailwind CSS v4 + KaTeX, with effects and components from [React Bits](https://reactbits.dev)
 (TS + Tailwind variants, vendored in `src/components/reactbits/`).
 
-**Not released yet.** `released` in `src/data/paper.ts` is `false`, so the Paper, arXiv, Code and Data links render as "soon". When the
+**Not released yet.** `released` in `src/data/paper.ts` is `false`, so the Paper, arXiv, Code and Data links render as "soon".
+The link to the Route Anything research thread (`thread` in `src/data/paper.ts`, https://route-anything.vercel.app/, in the hero
+and the footer) is always live, because that site is already public. When the
 paper is posted, fill in `links.pdf` and `links.arxiv`, set `released = true`, replace the BibTeX placeholder `2610.xxxxx`, rebuild and
 publish.
 

@@ -3,7 +3,7 @@ import GlareHover from '@/components/reactbits/GlareHover/GlareHover';
 import { InfRecLogo } from '@/components/ui/TopBar';
 import { toast } from '@/components/ui/toast';
 import { M } from '@/components/math/M';
-import { authors, bibtex, paper } from '@/data/paper';
+import { authors, bibtex, paper, thread } from '@/data/paper';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useTokens } from '@/theme/tokens';
 
@@ -140,6 +140,21 @@ export function Cite() {
               {paper.title}: {paper.subtitle}. {authors.map((a) => a.name).join(', ')}. {paper.date}. Figures marked <em>Paper data</em> are
               redrawn from the paper&rsquo;s tables and figures; figures marked <em>Schematic</em> illustrate a result with made-up numbers.
               The omni-modal outcome matrix is proprietary and is not released.
+            </p>
+            <p className="mt-3 max-w-[520px] font-sans text-[13px] leading-relaxed text-ink-3">
+              Part of the{' '}
+              <a
+                href={thread.href}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1 font-medium text-ink-2 underline decoration-rule-2 underline-offset-4 transition-colors hover:text-accent hover:decoration-accent"
+              >
+                Route Anything research thread
+                <svg viewBox="0 0 16 16" className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                  <path d="M5 11l6-6M6.5 5H11v4.5" />
+                </svg>
+              </a>
+              : {thread.blurb}.
             </p>
           </div>
           <div className="flex flex-col items-start gap-2 md:items-end">

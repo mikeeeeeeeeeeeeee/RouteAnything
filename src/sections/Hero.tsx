@@ -7,7 +7,7 @@ import Magnet from '@/components/reactbits/Magnet/Magnet';
 import ShinyText from '@/components/reactbits/ShinyText/ShinyText';
 import { CapabilityField, type FocusWord } from '@/components/viz/CapabilityField';
 import { InfRecLogo } from '@/components/ui/TopBar';
-import { affiliations, authors, live, paper } from '@/data/paper';
+import { affiliations, authors, live, paper, thread } from '@/data/paper';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useTokens } from '@/theme/tokens';
 import { scrollToId } from '@/lib/scrollspy';
@@ -144,6 +144,24 @@ export function Hero() {
                   </span>
                 </StarBorder>
               </Magnet>
+              <a
+                href={thread.href}
+                target="_blank"
+                rel="noreferrer"
+                title={`${thread.host}: ${thread.blurb}`}
+                className="flex h-[46px] items-center gap-2 rounded-full border border-rule bg-surface px-4 font-sans text-[14px] font-medium text-ink-2 shadow-[var(--shadow)] transition-colors hover:border-accent hover:text-accent"
+              >
+                <svg viewBox="0 0 16 16" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                  <circle cx="3" cy="8" r="1.6" />
+                  <circle cx="13" cy="3.5" r="1.6" />
+                  <circle cx="13" cy="12.5" r="1.6" />
+                  <path d="M4.6 8H7l4.4-3.7M7 8l4.4 3.7" />
+                </svg>
+                {thread.label}
+                <svg viewBox="0 0 16 16" className="h-3 w-3 opacity-70" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                  <path d="M5 11l6-6M6.5 5H11v4.5" />
+                </svg>
+              </a>
               <LinkGroup
                 links={[
                   { label: 'Paper', href: live(paper.links.pdf), icon: 'pdf' },

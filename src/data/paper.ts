@@ -21,6 +21,14 @@ export const paper = {
 /** a link only once the paper is out */
 export const live = (href: string) => (released ? href : '');
 
+/** The research thread this paper belongs to (Pengfei Zhou's site). It is already public, so it links before release too. */
+export const thread = {
+  href: 'https://route-anything.vercel.app/',
+  host: 'route-anything.vercel.app',
+  label: 'Research thread',
+  blurb: 'routing at every granularity, from agents and models down to single denoising steps',
+};
+
 export const authors = [
   { name: 'Pengfei Zhou', aff: [1, 2] },
   { name: 'Yixing Ma', aff: [2, 3] },
