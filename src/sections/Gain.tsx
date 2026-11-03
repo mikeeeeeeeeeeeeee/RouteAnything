@@ -63,7 +63,7 @@ export function Gain() {
           label={
             <>
               What was measured
-              <span className="num font-mono text-[11.5px] font-normal text-ink-3">
+              <span className="num hidden font-mono text-[11.5px] font-normal text-ink-3 sm:inline">
                 {MATRIX.benchmarks} benchmarks · {MATRIX.runs.toLocaleString('en-US')} scored runs · {MATRIX.armVersions} candidate configurations
               </span>
             </>
