@@ -9,7 +9,7 @@ import { useTokens } from '@/theme/tokens';
 import { FigTag } from './flow';
 import { TexLabel, mono, sans } from './svg';
 
-// Proposition 4(b), schematic. Arm A always delivers a; arm B delivers 1 with probability b and 0
+// Proposition 4(b), schematic. Candidate A always delivers a; candidate B delivers 1 with probability b and 0
 // otherwise, with 1/2 < b < a < 1. B wins exactly when it delivers 1, so a winner label teaches
 // p_A = 1 - b < p_B = b and a classifier plays B, while outcome regression learns E[V_A] = a > E[V_B] = b
 // and plays A. The classifier gives up a - b, which nears half the value range as a -> 1, b -> 1/2.
@@ -43,14 +43,14 @@ const useSafeId = () => `wt-${useId().replace(/[^a-zA-Z0-9_-]/g, '')}`;
 /* ------------------------------------------------------------------ */
 
 function ArmControl({
-  arm,
+  candidate,
   color,
   sym,
   desc,
   value,
   onChange,
 }: {
-  arm: 'A' | 'B';
+  candidate: 'A' | 'B';
   color: string;
   sym: 'a' | 'b';
   desc: ReactNode;
@@ -63,14 +63,14 @@ function ArmControl({
         <span className="flex min-w-0 items-baseline gap-2 font-sans text-[13.5px] leading-snug text-ink-2">
           <span className="inline-block h-2.5 w-2.5 shrink-0 translate-y-[1px] rounded-[3px]" style={{ background: color }} />
           <span>
-            Arm <M>{arm}</M> {desc}
+            Candidate <M>{candidate}</M> {desc}
           </span>
         </span>
         <span className="shrink-0 font-mono text-[13px] tabular-nums text-ink">
           <M>{sym}</M> = {f2(value / 100)}
         </span>
       </div>
-      <Slider value={value - 50} onChange={(v) => onChange(v + 50)} max={50} color={color} left="½" right="1" ariaLabel={`${sym}, ${arm === 'A' ? 'the value arm A always delivers' : 'the probability that arm B delivers 1'}`} className="mt-1" />
+      <Slider value={value - 50} onChange={(v) => onChange(v + 50)} max={50} color={color} left="½" right="1" ariaLabel={`${sym}, ${candidate === 'A' ? 'the value candidate A always delivers' : 'the probability that candidate B delivers 1'}`} className="mt-1" />
     </div>
   );
 }
@@ -158,8 +158,8 @@ function Panel({ kind, a, b, narrow, grow, delay }: { kind: 'win' | 'value'; a: 
         role="img"
         aria-label={
           kind === 'win'
-            ? `Probability of winning: arm A ${f2(1 - b)}, arm B ${f2(b)}. A classifier on winner labels picks B.`
-            : `Expected value: arm A ${f2(a)}, arm B ${f2(b)}. Outcome regression picks A; picking B loses ${f2(a - b)}.`
+            ? `Probability of winning: candidate A ${f2(1 - b)}, candidate B ${f2(b)}. A classifier on winner labels picks B.`
+            : `Expected value: candidate A ${f2(a)}, candidate B ${f2(b)}. Outcome regression picks A; picking B loses ${f2(a - b)}.`
         }
       >
         <defs>
@@ -240,9 +240,9 @@ function Panel({ kind, a, b, narrow, grow, delay }: { kind: 'win' | 'value'; a: 
 /* the tie-break example                                               */
 /* ------------------------------------------------------------------ */
 
-// Slow arm succeeds with probability 0.9, the faster independent arm with 0.5; ties go to the faster
-// arm. Twenty draws with the exact expected counts (9 both succeed, 9 only the slow arm, 1 only the
-// fast arm, 1 neither), in a fixed pseudo-random order.
+// Slow candidate succeeds with probability 0.9, the faster independent candidate with 0.5; ties go to the faster
+// candidate. Twenty draws with the exact expected counts (9 both succeed, 9 only the slow candidate, 1 only the
+// fast candidate, 1 neither), in a fixed pseudo-random order.
 const P_SLOW = 0.9;
 const P_FAST = 0.5;
 type Draw = { slow: boolean; fast: boolean };
@@ -251,7 +251,7 @@ const DRAWS: Draw[] = [...Array<string>(9).fill('both'), ...Array<string>(9).fil
   .sort((p, q) => p.u - q.u)
   .map(({ k }) => ({ slow: k === 'both' || k === 'slow', fast: k === 'both' || k === 'fast' }));
 const N_DRAWS = DRAWS.length;
-/** the slow arm wins the label only when it succeeds and the fast arm fails */
+/** the slow candidate wins the label only when it succeeds and the fast candidate fails */
 const slowWins = (d: Draw) => d.slow && !d.fast;
 const isTie = (d: Draw) => d.slow === d.fast;
 
@@ -329,7 +329,7 @@ function TieStrip({ reduced }: { reduced: boolean }) {
       <div className="flex flex-wrap items-baseline justify-between gap-x-5 gap-y-1.5">
         <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
           <span className="font-mono text-[10.5px] uppercase tracking-[0.16em] text-ink-3">Ties make it worse</span>
-          <span className="font-sans text-[13px] text-ink-2">Both succeed, or both fail: the label goes to the faster arm.</span>
+          <span className="font-sans text-[13px] text-ink-2">Both succeed, or both fail: the label goes to the faster candidate.</span>
         </div>
         <button
           type="button"
@@ -346,12 +346,12 @@ function TieStrip({ reduced }: { reduced: boolean }) {
           viewBox={`0 0 ${G.W} ${G.H}`}
           className={`h-auto w-full overflow-visible ${narrow ? 'mx-auto max-w-[420px]' : ''}`}
           role="img"
-          aria-label="Twenty paired draws. The slow arm succeeds in 18, the fast arm in 10; the slow arm wins the label in 9, because ties go to the fast arm."
+          aria-label="Twenty paired draws. The slow candidate succeeds in 18, the fast candidate in 10; the slow candidate wins the label in 9, because ties go to the fast candidate."
         >
           {Array.from({ length: Math.ceil(N_DRAWS / G.perRow) }, (_, blk) => (
             <g key={blk} transform={`translate(0 ${blk * G.blockH})`}>
-              {rowLabel(G.rows.slow, A_COLOR, narrow ? 'slow' : 'slow arm', '0.9')}
-              {rowLabel(G.rows.fast, B_COLOR, narrow ? 'fast' : 'fast arm', '0.5')}
+              {rowLabel(G.rows.slow, A_COLOR, narrow ? 'slow' : 'slow candidate', '0.9')}
+              {rowLabel(G.rows.fast, B_COLOR, narrow ? 'fast' : 'fast candidate', '0.5')}
               {rowLabel(G.rows.label, null, narrow ? 'label' : 'winner label', null)}
             </g>
           ))}
@@ -482,8 +482,8 @@ export function WinnerTrap() {
   return (
     <div ref={ref}>
       <div className="grid grid-cols-1 gap-x-10 gap-y-4 md:grid-cols-2">
-        <ArmControl arm="A" color={tk.teal} sym="a" desc={<>always delivers <M>{'a'}</M></>} value={aH} onChange={changeA} />
-        <ArmControl arm="B" color={tk.amber} sym="b" desc={<>delivers 1 with probability <M>{'b'}</M>, else 0</>} value={bH} onChange={changeB} />
+        <ArmControl candidate="A" color={tk.teal} sym="a" desc={<>always delivers <M>{'a'}</M></>} value={aH} onChange={changeA} />
+        <ArmControl candidate="B" color={tk.amber} sym="b" desc={<>delivers 1 with probability <M>{'b'}</M>, else 0</>} value={bH} onChange={changeB} />
       </div>
       <div className="mt-2 flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
         <span className="text-[13.5px] text-ink-3">

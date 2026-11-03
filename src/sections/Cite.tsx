@@ -3,18 +3,19 @@ import GlareHover from '@/components/reactbits/GlareHover/GlareHover';
 import { InfRecLogo } from '@/components/ui/TopBar';
 import { toast } from '@/components/ui/toast';
 import { M } from '@/components/math/M';
-import { authors, bibtex, paper, thread } from '@/data/paper';
+import { Fold } from '@/components/ui/Fold';
+import { bibtex, paper, thread } from '@/data/paper';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useTokens } from '@/theme/tokens';
 
 const RULES = [
   {
-    title: 'Compare arms on the same inputs.',
-    body: 'Measure gains against the matched best fixed arm, chosen and evaluated under the same fallback as the router.',
+    title: 'Compare candidates on the same inputs.',
+    body: 'Measure gains against the matched best fixed candidate, chosen and evaluated under the same fallback as the router.',
   },
   {
-    title: 'Train routers on per-arm outcomes.',
-    body: 'Look for headroom inside task types: a router that learns mainly the type recovers the best fixed arm and little more.',
+    title: 'Train routers on per-candidate outcomes.',
+    body: 'Look for headroom inside task types: a router that learns mainly the type recovers the best fixed candidate and little more.',
   },
   {
     title: 'Fix the reference and the tolerance before ranking routes.',
@@ -51,17 +52,14 @@ export function Cite() {
     );
 
   return (
-    <section id="cite" className="relative scroll-mt-20 border-t border-rule py-24 md:py-32">
+    <section id="cite" className="relative scroll-mt-20 border-t border-rule py-16 md:py-24">
       <div className="mx-auto max-w-[1180px] px-5 md:px-8">
-        <div className="mb-20">
+        <div className="mb-16">
           <div className="smallcaps text-[10.5px] text-accent">Conclusion</div>
           <h2 className="display mt-3 max-w-[820px] text-[clamp(34px,4vw,52px)] text-ink">Three rules follow.</h2>
           <p className="mt-5 max-w-[760px] font-serif text-[17px] leading-[1.7] text-ink-2">
-            Across text, images, video, speech, code and robots, the best arm changes from input to input, and the per-input oracle sits
-            5.4 points above the best fixed arm per benchmark. Most of that headroom lies within task types. Where the input shows which arm
-            will win, as camera frames do for robot policies, a router trained on per-arm outcomes follows it. Routing pays most reliably
-            through price: when arms are close in quality and far apart in cost, the reference and the quality tolerance fix the price, and a
-            finite-sample test certifies the quality floor.
+            The best candidate changes from input to input, and most of the 5.4-point headroom lies within task types. Routing pays most
+            reliably through price, where the reference and the quality tolerance fix it and a finite-sample test certifies the floor.
           </p>
           <ol className="mt-10 grid grid-cols-1 gap-5 md:grid-cols-3">
             {RULES.map((r, i) => (
@@ -77,7 +75,12 @@ export function Cite() {
           <div>
             <div className="smallcaps text-[10.5px] text-accent">Limitations</div>
             <h2 className="display mt-3 text-[clamp(34px,4vw,48px)] text-ink">What the results do not say.</h2>
-            <ol className="mt-8 space-y-6">
+            <p className="mt-4 font-serif text-[16px] leading-relaxed text-ink-3">
+              Seven understanding benchmarks have no router results yet, prices exist only for some testbeds, and the theory takes the law of
+              states as given.
+            </p>
+            <Fold label="All four limitations" className="mt-6">
+            <ol className="space-y-6">
               {LIMITS.map((l, i) => (
                 <li key={l.title} className="grid grid-cols-[36px_minmax(0,1fr)] gap-3">
                   <span className="font-display text-[26px] font-semibold leading-none text-ink-4">{i + 1}</span>
@@ -88,6 +91,7 @@ export function Cite() {
                 </li>
               ))}
             </ol>
+            </Fold>
           </div>
 
           <div>
@@ -137,9 +141,8 @@ export function Cite() {
           <div>
             <InfRecLogo className="h-8 w-auto" />
             <p className="mt-4 max-w-[520px] font-serif text-[14.5px] leading-relaxed text-ink-3">
-              {paper.title}: {paper.subtitle}. {authors.map((a) => a.name).join(', ')}. {paper.date}. Figures marked <em>Paper data</em> are
-              redrawn from the paper&rsquo;s tables and figures; figures marked <em>Schematic</em> illustrate a result with made-up numbers.
-              The omni-modal outcome matrix is proprietary and is not released.
+              {paper.title}: {paper.subtitle}. {paper.date}. Figures marked <em>Paper data</em> are redrawn from the paper&rsquo;s tables and
+              figures; figures marked <em>Schematic</em> illustrate a result with made-up numbers. The omni-modal matrix itself is not released.
             </p>
             <p className="mt-3 max-w-[520px] font-sans text-[13px] leading-relaxed text-ink-3">
               Part of the{' '}

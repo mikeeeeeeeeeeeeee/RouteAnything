@@ -7,7 +7,7 @@ import { mono, sans } from './svg';
 // Finding 4 (Table 4). Same inputs, backbone and training scenes on RoboTwin; only the training
 // target differs. Per-policy outcome regression follows the scene; the winner-label classifier
 // collapses, because most successful training outcomes become wrong-class targets. Below: the
-// labels behind the collapse, and the other panels, where no target beats the fixed arm.
+// labels behind the collapse, and the other panels, where no target beats the fixed candidate.
 
 const MINUS = '−';
 const NB = '\u00a0';
@@ -443,7 +443,7 @@ function Labels({ inView, tip }: { inView: boolean; tip: TipApi }) {
 }
 
 /* ---------------------------------------------------------------- */
-/* (c) the other panels: difference from the fixed arm, points         */
+/* (c) the other panels: difference from the fixed candidate, points         */
 /* ---------------------------------------------------------------- */
 
 const E = OBJECTIVES.eleven;
@@ -464,7 +464,7 @@ const OTHERS: { key: string; name: string; meta: string; d: number; ci?: [number
     ci: E_OUT.ci,
     score: E_OUT.score,
     fixed: E_FIX.score,
-    fixedLabel: 'matched fixed arm',
+    fixedLabel: 'matched fixed candidate',
     color: 'var(--blue)',
     shape: 'dot',
   },
@@ -476,7 +476,7 @@ const OTHERS: { key: string; name: string; meta: string; d: number; ci?: [number
     ci: E_TYPE.ci,
     score: E_TYPE.score,
     fixed: E_FIX.score,
-    fixedLabel: 'matched fixed arm',
+    fixedLabel: 'matched fixed candidate',
     color: 'var(--ink-3)',
     shape: 'square',
   },
@@ -487,7 +487,7 @@ const OTHERS: { key: string; name: string; meta: string; d: number; ci?: [number
     d: S_WIN.diff!,
     score: S_WIN.score,
     fixed: S_FIX.score,
-    fixedLabel: 'fixed arm, best training mean',
+    fixedLabel: 'fixed candidate, best training mean',
     color: 'var(--coral)',
     shape: 'diamond',
   },
@@ -538,14 +538,14 @@ function Others({ inView, tip }: { inView: boolean; tip: TipApi }) {
 
   return (
     <div ref={ref}>
-      <Kicker>Outside robotics · vs. the fixed arm</Kicker>
-      <svg viewBox={`0 0 ${w} ${H}`} width={w} height={H} className="mt-3 block h-auto w-full overflow-visible" role="group" aria-label="Difference from the fixed arm, in points, of three routers on 11 and 16 benchmarks">
+      <Kicker>Outside robotics · vs. the fixed candidate</Kicker>
+      <svg viewBox={`0 0 ${w} ${H}`} width={w} height={H} className="mt-3 block h-auto w-full overflow-visible" role="group" aria-label="Difference from the fixed candidate, in points, of three routers on 11 and 16 benchmarks">
         {[-3, -2, -1, 1].map((d) => (
           <line key={d} x1={X(d)} x2={X(d)} y1={top - 6} y2={axisY - 12} stroke="var(--rule)" />
         ))}
         <line x1={X(0)} x2={X(0)} y1={top - 10} y2={axisY - 12} stroke="var(--slate)" strokeWidth={2} strokeLinecap="round" />
         <text x={X(0)} y={top - 16} textAnchor="middle" fontSize={9.5} letterSpacing="0.14em" fill="var(--ink-3)" style={mono}>
-          FIXED ARM
+          FIXED CANDIDATE
         </text>
 
         {OTHERS.map((r, i) => {
@@ -591,7 +591,7 @@ function Others({ inView, tip }: { inView: boolean; tip: TipApi }) {
                 fill="transparent"
                 role="img"
                 tabIndex={0}
-                aria-label={`${r.name}, ${r.meta}: ${sgn(r.d)} points vs. the fixed arm`}
+                aria-label={`${r.name}, ${r.meta}: ${sgn(r.d)} points vs. the fixed candidate`}
                 onPointerEnter={() => setHover(r.key)}
                 onPointerMove={(e) => tip.at(e, body(r))}
                 onPointerLeave={() => {
@@ -618,13 +618,13 @@ function Others({ inView, tip }: { inView: boolean; tip: TipApi }) {
           </text>
         ))}
         <text x={(X(D0) + X(D1)) / 2} y={axisY + 19} textAnchor="middle" fontSize={11.5} fill="var(--ink-3)" style={serifItalic}>
-          router − fixed arm, points
+          router − fixed candidate, points
         </text>
       </svg>
       <p className="mt-2 font-sans text-[12.5px] leading-snug text-ink-3">
-        No target beats the fixed arm. Only a third of the {int(OBJECTIVES.winnerLabels16.labels)} winner labels are decided by a unique best outcome; the type
+        No target beats the fixed candidate. Only a third of the {int(OBJECTIVES.winnerLabels16.labels)} winner labels are decided by a unique best outcome; the type
         classifier, {Math.round(OBJECTIVES.typeRouter.accuracy * 100)}% accurate, maps {Math.round(OBJECTIVES.typeRouter.sameArm * 100)}% of its predictions to the
-        true type&rsquo;s arm.
+        true type&rsquo;s candidate.
       </p>
     </div>
   );

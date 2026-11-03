@@ -81,7 +81,7 @@ interface Props {
 }
 
 /**
- * Every arm is a line v - lambda c. At a price lambda the router takes the highest
+ * Every candidate is a line v - lambda c. At a price lambda the router takes the highest
  * line; an action's efficiency v/c is where its line crosses zero. Dinkelbach's iteration (Newton's
  * method on Phi) walks from eta_B to eta*. One schematic state.
  */

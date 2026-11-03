@@ -6,7 +6,7 @@ import { tex } from '@/lib/tex';
 import { FigTag, FlowEdge, FlowNode, Packet, type Tone } from './flow';
 import { TexLabel } from './svg';
 
-// An arm can be a whole execution plan: one call, a cascade that verifies a cheap primary and falls
+// A candidate can be a whole execution plan: one call, a cascade that verifies a cheap primary and falls
 // back to the reference, or a plan that retries after a failure and shows the retry the failing
 // tests. Packets are tasks; the verifier accepts about three in five, the tests pass about half.
 

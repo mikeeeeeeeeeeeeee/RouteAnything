@@ -6,11 +6,11 @@ import { useClock, useInView, useReducedMotion } from '@/lib/hooks';
 import type { Pt } from '@/lib/polyline';
 import { Packet } from './flow';
 
-// §3, the omni-modal outcome matrix. Every arm of a pool runs on the same inputs and each run is
+// §3, the omni-modal outcome matrix. Every candidate of a pool runs on the same inputs and each run is
 // scored with the benchmark's own metric. Groups are listed in the order of the paper's Fig. 1a
 // (questions, image questions, agent tasks, generation prompts, robot scenes), which is also the
-// order of the pools they draw on, so no two links cross. Per-group test inputs and arm counts are
-// Table 2; per-benchmark inputs and fixed arms are Table 6; the panels are Table 1.
+// order of the pools they draw on, so no two links cross. Per-group test inputs and candidate counts are
+// Table 2; per-benchmark inputs and fixed candidates are Table 6; the panels are Table 1.
 
 const ORDER: GroupKey[] = ['text', 'imgqa', 'agents', 'imggen', 'video', 'speech', 'robot'];
 const ROWS = ORDER.map((k) => GROUPS.find((g) => g.key === k)!);
@@ -21,10 +21,10 @@ const POOL = Object.fromEntries(POOLS.map((p) => [p.key, p])) as Record<PoolKey,
 const ALIAS: Record<string, string> = { GPQA: 'GPQA (extended)', MMMU: 'MMMU (dev/val)' };
 const benchRow = (name: string) => HEADROOM_BENCH.find((b) => b.bench === (ALIAS[name] ?? name));
 
-/** GPT-6 Astra joins for long-context, knowledge and agent tasks; image-text QA has three arms (Table 2) */
+/** GPT-6 Astra joins for long-context, knowledge and agent tasks; image-text QA has three candidates (Table 1) */
 const ASTRA = 'GPT-6 Astra';
-const armsFor = (g: GroupKey) => POOL[GROUPS.find((x) => x.key === g)!.pool].arms.filter((a) => g !== 'imgqa' || a !== ASTRA);
-const poolArm = (pool: PoolKey, short: string) => POOL[pool].arms.find((a) => a === short || a.includes(short));
+const armsFor = (g: GroupKey) => POOL[GROUPS.find((x) => x.key === g)!.pool].candidates.filter((a) => g !== 'imgqa' || a !== ASTRA);
+const poolArm = (pool: PoolKey, short: string) => POOL[pool].candidates.find((a) => a === short || a.includes(short));
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 const fmt = (n: number) => n.toLocaleString('en-US');
@@ -67,8 +67,8 @@ export function MatrixMap() {
 const STATS = [
   { value: MATRIX.runs, label: 'scored runs', note: 'each with its benchmark’s own metric, on a 0–100 scale' },
   { value: MATRIX.tasks, label: 'tasks', note: `${MATRIX.benchmarks} benchmarks in seven groups` },
-  { value: MATRIX.armVersions, label: 'arm versions', note: 'which differ in model, harness and effort' },
-  { value: MATRIX.testInputs, label: 'test inputs', note: 'on which every arm of the pool is scored' },
+  { value: MATRIX.armVersions, label: 'candidate configurations', note: 'which differ in model, harness and effort' },
+  { value: MATRIX.testInputs, label: 'test inputs', note: 'on which every candidate of the pool is scored' },
 ];
 
 function Headline({ on, cols }: { on: boolean; cols: 2 | 4 }) {
@@ -237,7 +237,7 @@ function MapView({ reduced, wide }: { reduced: boolean; wide: boolean }) {
   const litPool = (p: PoolKey) => !focus || (focus.kind === 'pool' ? focus.key === p : poolOf(focus.key) === p);
   const active = (g: GroupKey) => !!focus && litGroup(g);
   const activePool = (p: PoolKey) => !!focus && litPool(p);
-  const litArms = new Set<string>(focus?.kind === 'group' ? armsFor(focus.key) : focus?.kind === 'pool' ? POOL[focus.key].arms : []);
+  const litArms = new Set<string>(focus?.kind === 'group' ? armsFor(focus.key) : focus?.kind === 'pool' ? POOL[focus.key].candidates : []);
   const tipRow = tip ? benchRow(tip.bench) : undefined;
   const fixedArm = tip && tipRow ? poolArm(poolOf(tip.group), tipRow.fixedArm) : undefined;
 
@@ -255,7 +255,7 @@ function MapView({ reduced, wide }: { reduced: boolean; wide: boolean }) {
           rowRefs.current[i] = n;
         }}
         tabIndex={0}
-        aria-label={`${g.label}: ${g.benchmarks.length} benchmarks, ${fmt(h.inputs)} test ${unit} scored by ${h.arms} ${POOL[g.pool].label.toLowerCase()}`}
+        aria-label={`${g.label}: ${g.benchmarks.length} benchmarks, ${fmt(h.inputs)} test ${unit} scored by ${h.candidates} ${POOL[g.pool].label.toLowerCase()}`}
         {...enter(g.key)}
         className={`border-t border-rule outline-none first:border-t-0 ${wide ? 'py-[11px]' : 'py-3'}`}
         initial={{ opacity: 0, y: 8 }}
@@ -276,7 +276,7 @@ function MapView({ reduced, wide }: { reduced: boolean; wide: boolean }) {
             </span>
             <div className={`font-sans text-[13.5px] font-semibold leading-[1.2] text-ink ${wide ? 'mt-[6px]' : ''}`}>{g.label}</div>
             <div className={`num text-[10.5px] leading-none ${act ? 'text-ink-2' : 'text-ink-3'} ${wide ? 'mt-[6px]' : 'basis-full'}`}>
-              {fmt(h.inputs)} {unit} <span className="text-ink-4">×</span> {h.arms} arms
+              {fmt(h.inputs)} {unit} <span className="text-ink-4">×</span> {h.candidates} candidates
             </div>
           </div>
           <div className="flex flex-wrap gap-[5px]">
@@ -334,7 +334,7 @@ function MapView({ reduced, wide }: { reduced: boolean; wide: boolean }) {
           poolRefs.current[p.key] = n;
         }}
         tabIndex={0}
-        aria-label={`${p.label}: ${p.arms.join(', ')}`}
+        aria-label={`${p.label}: ${p.candidates.join(', ')}`}
         onMouseEnter={() => setFocus({ kind: 'pool', key: p.key })}
         onMouseLeave={() => setFocus(null)}
         onFocus={() => setFocus({ kind: 'pool', key: p.key })}
@@ -353,10 +353,10 @@ function MapView({ reduced, wide }: { reduced: boolean; wide: boolean }) {
         >
           <div className="flex items-baseline justify-between gap-3">
             <span className="font-sans text-[13px] font-semibold text-ink">{p.label}</span>
-            <span className="num text-[10.5px] text-ink-3">×{p.arms.length}</span>
+            <span className="num text-[10.5px] text-ink-3">×{p.size}</span>
           </div>
           <div className="mt-[7px] flex flex-wrap gap-x-[10px] gap-y-[6px]">
-            {p.arms.map((a) => {
+            {p.candidates.map((a) => {
               const isFixed = fixedArm === a;
               const lit = litArms.has(a);
               return (
@@ -389,7 +389,7 @@ function MapView({ reduced, wide }: { reduced: boolean; wide: boolean }) {
         {wide && (
           <>
             <span />
-            <span className="pl-1">Arm pools</span>
+            <span className="pl-1">Candidate pools</span>
           </>
         )}
       </div>
@@ -461,7 +461,7 @@ function MapView({ reduced, wide }: { reduced: boolean; wide: boolean }) {
           </div>
         ) : (
           <div className="mt-2 border-t border-rule-2 pt-4">
-            <div className="mb-2.5 font-mono text-[9.5px] uppercase tracking-[0.16em] text-ink-3">Arm pools</div>
+            <div className="mb-2.5 font-mono text-[9.5px] uppercase tracking-[0.16em] text-ink-3">Candidate pools</div>
             <div className="grid grid-cols-1 gap-2 @[26rem]:grid-cols-2">{POOLS.map(poolCard)}</div>
           </div>
         )}
@@ -476,11 +476,11 @@ function MapView({ reduced, wide }: { reduced: boolean; wide: boolean }) {
               <>
                 <div className="flex items-baseline gap-1.5">
                   <span className="num text-[14px] font-semibold text-ink">{fmt(tipRow.inputs)}</span>
-                  <span className="font-sans text-[11.5px] text-ink-3">test {tip.group === 'robot' ? 'scenes' : 'inputs'}, every arm scored</span>
+                  <span className="font-sans text-[11.5px] text-ink-3">test {tip.group === 'robot' ? 'scenes' : 'inputs'}, every candidate scored</span>
                 </div>
                 <div className="mt-1 font-sans text-[11.5px] leading-snug text-ink-2">
                   {tipRow.bench}
-                  <span className="text-ink-3"> · fixed arm </span>
+                  <span className="text-ink-3"> · fixed candidate </span>
                   <span className="mx-[3px] inline-block h-[7px] w-[7px] rounded-full align-middle" style={{ background: 'var(--amber)' }} />
                   {tipRow.fixedArm}
                 </div>
@@ -488,7 +488,7 @@ function MapView({ reduced, wide }: { reduced: boolean; wide: boolean }) {
             ) : (
               <div className="font-sans text-[11.5px] leading-snug text-ink-2">
                 <b className="font-semibold text-ink">{tip.bench}</b> is left out of the test panel: each model’s later steps contain its own earlier code, so
-                arms rarely share an input.
+                candidates rarely share an input.
               </div>
             )}
           </div>
@@ -505,7 +505,7 @@ function MapView({ reduced, wide }: { reduced: boolean; wide: boolean }) {
         </span>
         <span className="flex items-center gap-1.5">
           <span className="inline-block h-[7px] w-[7px] rounded-full" style={{ background: 'var(--amber)' }} />
-          a benchmark’s fixed arm, on {wide ? 'hover' : 'tap'}
+          a benchmark’s fixed candidate, on {wide ? 'hover' : 'tap'}
         </span>
       </div>
     </div>
@@ -513,7 +513,7 @@ function MapView({ reduced, wide }: { reduced: boolean; wide: boolean }) {
 }
 
 /* ------------------------------------------------------------------ */
-/* (c) Table 1: evaluation panels                                       */
+/* (c) Table 2: evaluation panels                                       */
 /* ------------------------------------------------------------------ */
 
 const f2 = (v: number) => v.toFixed(2);
@@ -530,7 +530,7 @@ function PanelsTable({ wide }: { wide: boolean }) {
           </span>
         }
       >
-        Evaluation panels · Table 1
+        Evaluation panels · Table 2
       </Kicker>
       {wide ? (
         <table className="mt-3 w-full border-collapse text-left">
@@ -599,7 +599,7 @@ function PanelsTable({ wide }: { wide: boolean }) {
         </div>
       )}
       <p className="mt-2.5 font-sans text-[11.5px] leading-snug text-ink-3">
-        Each study is scored on the test inputs where all its compared policies have outcomes, so the fixed arm and the oracle differ from study to study.
+        Each study is scored on the test inputs where all its compared policies have outcomes, so the fixed candidate and the oracle differ from study to study.
       </p>
     </div>
   );
@@ -613,7 +613,7 @@ function Testbeds({ cols }: { cols: 1 | 2 }) {
   const crb = SETUP.coderouterbench;
   const rb = SETUP.routerbench;
   const items = [
-    { name: crb.name, what: 'code', facts: [`${crb.models} models`, `${fmt(crb.tasks)} coding tasks`, `${crb.arms} arms per state`], ref: crb.reference },
+    { name: crb.name, what: 'code', facts: [`${crb.models} models`, `${fmt(crb.tasks)} coding tasks`, `${crb.candidates} candidates per state`], ref: crb.reference },
     { name: rb.name, what: 'text', facts: [`${rb.models} models`, `${fmt(rb.prompts)} prompts`, 'split 70/30'], ref: rb.reference },
   ];
   return (

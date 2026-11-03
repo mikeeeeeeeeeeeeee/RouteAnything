@@ -1,9 +1,9 @@
-// Numbers transcribed from the paper (Route Anything: an attempt for AGI through a simple omni-modal
-// router, manuscript of 2026-10-24). Each block names its source. Table numbers follow the published
-// layout: Tables 1–5 in the body, 6–9 in Appendix B (the matrix), 10–17 in Appendix C (code and text).
+// Numbers transcribed from the paper (Route Anything: A Study of Model and Policy Routing for General-Purpose
+// AI Systems, 2026-11-03 PDF; its body matches the 11-03 source). Each block names its source. Tables 1–5
+// are in the body (1 headroom, 2 panels), 6–9 in Appendix B (the matrix), 10–17 in Appendix C (code and text).
 
 /* ================================================================== */
-/* The omni-modal outcome matrix (§3, Appendix B)                      */
+/* The omni-modal matrix (§3, Appendix B)                             */
 /* ================================================================== */
 
 export const MATRIX = {
@@ -25,27 +25,29 @@ export interface PoolSpec {
   key: PoolKey;
   label: string;
   short: string;
-  arms: string[];
+  candidates: string[];
+  /** pool size as the paper's Figure 1 states it */
+  size: string;
   note?: string;
 }
 
-/** §3 and App. B.1: the arm pools */
+/** §3 and App. B.1: the candidate pools */
 export const POOLS: PoolSpec[] = [
   {
     key: 'lm',
     label: 'Language models',
-    short: 'Language',
-    arms: ['Claude Opus 5.5', 'GPT-6.1 Sol', 'DeepSeek V4.1 Flash', 'GPT-6 Astra'],
+    short: 'Language', size: '3–4',
+    candidates: ['Claude Opus 5.5', 'GPT-6.1 Sol', 'DeepSeek V4.1 Flash', 'GPT-6 Astra'],
     note: 'GPT-6 Astra joins for long-context, knowledge and agent tasks',
   },
-  { key: 'image', label: 'Image generators', short: 'Image', arms: ['FLUX 3', 'Seedream 5.0 Pro', 'MAI-Image 2.6', 'GPT Image 2.5', 'Qwen-Image 3 Pro', 'Grok Imagine 2.0'] },
-  { key: 'video', label: 'Video generators', short: 'Video', arms: ['MiniMax H3', 'Seedance 2.5', 'Wan 3.0'] },
-  { key: 'speech', label: 'Speech generators', short: 'Speech', arms: ['Seed Audio 1.0', 'Fish S2.1 Pro', 'Gemini 3.8 Flash TTS'] },
+  { key: 'image', label: 'Image generators', short: 'Image', size: '6', candidates: ['FLUX 3', 'Seedream 5.0 Pro', 'MAI-Image 2.6', 'GPT Image 2.5', 'Qwen-Image 3 Pro', 'Grok Imagine 2.0'] },
+  { key: 'video', label: 'Video generators', short: 'Video', size: '3', candidates: ['MiniMax H3', 'Seedance 2.5', 'Wan 3.0'] },
+  { key: 'speech', label: 'Speech generators', short: 'Speech', size: '3', candidates: ['Seed Audio 1.0', 'Fish S2.1 Pro', 'Gemini 3.8 Flash TTS'] },
   {
     key: 'robot',
     label: 'Robot policies',
-    short: 'Robot',
-    arms: ['π0.5', 'GigaBrain', 'Spatial Forcing', 'X-VLA', 'X-WAM', 'PatchWAM', 'ME-Dex'],
+    short: 'Robot', size: '7',
+    candidates: ['π0.5', 'GigaBrain', 'Spatial Forcing', 'X-VLA', 'X-WAM', 'PatchWAM', 'ME-Dex'],
     note: 'vision-language-action policies, co-trained on the 50 RoboTwin tasks',
   },
 ];
@@ -73,40 +75,40 @@ export const GROUPS: GroupSpec[] = [
 
 export const groupLabel = (k: GroupKey) => GROUPS.find((g) => g.key === k)!.label;
 
-/** Table 1: evaluation panels. Fixed and oracle are comparable only within a row. */
+/** Table 2: evaluation panels. Fixed and oracle are comparable only within a row. */
 export const PANELS = [
-  { study: 'Headroom', where: '§4', policies: 'fixed arm, hindsight lookups', benchmarks: 24, inputs: 19814, seeds: null, fixed: 82.6, oracle: 87.98 },
-  { study: 'Rule-based tree', where: '§4, §5.1', policies: 'rule-based type router', benchmarks: 18, inputs: 5034, seeds: null, fixed: 77.03, oracle: 87.44 },
-  { study: 'One router', where: '§5.1', policies: 'capability-tree and untrained routers', benchmarks: 16, inputs: 3444, seeds: 1, fixed: 79.68, oracle: 84.8 },
-  { study: 'Robots', where: '§5.2, §5.3', policies: 'outcome and winner-label routers', benchmarks: 1, inputs: 2000, seeds: 1, fixed: 70.45, oracle: 88.85 },
-  { study: 'Targets', where: '§5.3, §5.4', policies: 'outcome and type routers', benchmarks: 11, inputs: 1302, seeds: 4, fixed: 68.3, oracle: 75.84 },
-  { study: 'Winner labels', where: '§5.3', policies: '12 winner-label recipes', benchmarks: 16, inputs: 3211, seeds: 1, fixed: 79.44, oracle: 85.77 },
+  { study: 'Headroom', where: '§3', policies: 'fixed candidate, hindsight lookups', benchmarks: 24, inputs: 19814, seeds: null, fixed: 82.6, oracle: 87.98 },
+  { study: 'Rule-based tree', where: '§3, §4.1', policies: 'rule-based type router', benchmarks: 18, inputs: 5034, seeds: null, fixed: 77.03, oracle: 87.44 },
+  { study: 'One router', where: '§4.1', policies: 'capability-tree and untrained routers', benchmarks: 16, inputs: 3444, seeds: 1, fixed: 79.68, oracle: 84.8 },
+  { study: 'Robots', where: '§4.2, §4.3', policies: 'outcome and winner-label routers', benchmarks: 1, inputs: 2000, seeds: 1, fixed: 70.45, oracle: 88.85 },
+  { study: 'Targets', where: '§4.3, §4.4', policies: 'outcome and type routers', benchmarks: 11, inputs: 1302, seeds: 4, fixed: 68.3, oracle: 75.84 },
+  { study: 'Winner labels', where: '§4.3', policies: '12 winner-label recipes', benchmarks: 16, inputs: 3211, seeds: 1, fixed: 79.44, oracle: 85.77 },
 ] as const;
 
 /* ------------------------------------------------------------------ */
-/* Finding 1 · Table 2 and Table 6: per-input headroom on the test split */
+/* Finding 1 · Table 1 and Table 6: per-input headroom on the test split */
 /* ------------------------------------------------------------------ */
 
 export interface HeadroomRow {
   group: GroupKey;
   benchmarks: number;
-  arms: string;
+  candidates: string;
   inputs: number;
   fixed: number;
-  /** best fixed arm per benchmark, chosen on the test inputs themselves */
+  /** best fixed candidate per benchmark, chosen on the test inputs themselves */
   hindsight: number;
   oracle: number;
   gap: number;
 }
 
 export const HEADROOM: HeadroomRow[] = [
-  { group: 'text', benchmarks: 7, arms: '3–4', inputs: 9482, fixed: 83.27, hindsight: 83.27, oracle: 87.56, gap: 4.28 },
-  { group: 'imgqa', benchmarks: 3, arms: '3', inputs: 5708, fixed: 85.32, hindsight: 85.32, oracle: 88.02, gap: 2.7 },
-  { group: 'imggen', benchmarks: 5, arms: '4–6', inputs: 1515, fixed: 82.93, hindsight: 82.99, oracle: 87.92, gap: 4.99 },
-  { group: 'video', benchmarks: 1, arms: '3', inputs: 158, fixed: 62.43, hindsight: 62.43, oracle: 81.36, gap: 18.93 },
-  { group: 'speech', benchmarks: 2, arms: '3', inputs: 608, fixed: 98.62, hindsight: 98.63, oracle: 99.3, gap: 0.68 },
-  { group: 'agents', benchmarks: 5, arms: '4', inputs: 343, fixed: 69.17, hindsight: 69.78, oracle: 77.29, gap: 8.11 },
-  { group: 'robot', benchmarks: 1, arms: '7', inputs: 2000, fixed: 70.45, hindsight: 70.45, oracle: 88.85, gap: 18.4 },
+  { group: 'text', benchmarks: 7, candidates: '3–4', inputs: 9482, fixed: 83.27, hindsight: 83.27, oracle: 87.56, gap: 4.28 },
+  { group: 'imgqa', benchmarks: 3, candidates: '3', inputs: 5708, fixed: 85.32, hindsight: 85.32, oracle: 88.02, gap: 2.7 },
+  { group: 'imggen', benchmarks: 5, candidates: '4–6', inputs: 1515, fixed: 82.93, hindsight: 82.99, oracle: 87.92, gap: 4.99 },
+  { group: 'video', benchmarks: 1, candidates: '3', inputs: 158, fixed: 62.43, hindsight: 62.43, oracle: 81.36, gap: 18.93 },
+  { group: 'speech', benchmarks: 2, candidates: '3', inputs: 608, fixed: 98.62, hindsight: 98.63, oracle: 99.3, gap: 0.68 },
+  { group: 'agents', benchmarks: 5, candidates: '4', inputs: 343, fixed: 69.17, hindsight: 69.78, oracle: 77.29, gap: 8.11 },
+  { group: 'robot', benchmarks: 1, candidates: '7', inputs: 2000, fixed: 70.45, hindsight: 70.45, oracle: 88.85, gap: 18.4 },
 ];
 
 export const HEADROOM_ALL = { benchmarks: 24, inputs: 19814, fixed: 82.6, hindsight: 82.62, oracle: 87.98, gap: 5.38 };
@@ -118,7 +120,7 @@ export interface BenchHeadroom {
   fixedArm: string;
   fixed: number;
   hindsight: number;
-  /** named when the best fixed arm in hindsight differs from the training choice */
+  /** named when the best fixed candidate in hindsight differs from the training choice */
   hindsightArm?: string;
   oracle: number;
   gap: number;
@@ -179,7 +181,7 @@ export interface RouterRow {
   router: number;
   oracle: number;
   diff: number;
-  /** router's gain over the fixed arm divided by the oracle's */
+  /** router's gain over the fixed candidate divided by the oracle's */
   share: number;
   ci?: [number, number];
 }
@@ -227,7 +229,7 @@ export const ROUTERS_BENCH = [
   { bench: 'Seed-TTS (zh)', group: 'speech', inputs: 401, fixedArm: 'Fish S2.1', fixed: 98.74, router: 98.74, oracle: 99.45 },
 ] as { bench: string; group: GroupKey; inputs: number; fixedArm: string; fixed: number; router: number; oracle: number }[];
 
-/** §5.1, Finding 2 */
+/** §4.1, Finding 2 */
 export const ONE_ROUTER = {
   leaves: 157,
   trainBenchmarks: 18,
@@ -257,7 +259,7 @@ export const ROBOT = {
   policies: 7,
   frames: '3 × 240×320',
   conditions: [
-    { key: 'clean', label: 'Clean', scenes: 1000, meDex: 78.4, patchWam: 81.7, router: 81.6, oracle: 93.3, sentTo: [{ arm: 'PatchWAM', n: 929 }] },
+    { key: 'clean', label: 'Clean', scenes: 1000, meDex: 78.4, patchWam: 81.7, router: 81.6, oracle: 93.3, sentTo: [{ candidate: 'PatchWAM', n: 929 }] },
     {
       key: 'randomized',
       label: 'Randomized',
@@ -267,8 +269,8 @@ export const ROBOT = {
       router: 61.5,
       oracle: 84.4,
       sentTo: [
-        { arm: 'ME-Dex', n: 842 },
-        { arm: 'GigaBrain', n: 141 },
+        { candidate: 'ME-Dex', n: 842 },
+        { candidate: 'GigaBrain', n: 141 },
       ],
     },
   ],
@@ -288,18 +290,18 @@ export const OBJECTIVES = {
     inputs: 1302,
     seeds: 4,
     rows: [
-      { key: 'fixed', label: 'Matched fixed arm', score: 68.3 },
+      { key: 'fixed', label: 'Matched fixed candidate', score: 68.3 },
       { key: 'outcome', label: 'Outcome router', score: 67.9, diff: -0.4, ci: [-1.19, 0.33] as [number, number] },
       { key: 'type', label: '68-type classifier + table', score: 66.98, diff: -1.32, ci: [-3.05, 0.34] as [number, number] },
       { key: 'oracle', label: 'Oracle', score: 75.84, diff: 7.55 },
-      { key: 'full', label: 'Fixed arm requiring full coverage', score: 65.52, diff: -2.78 },
+      { key: 'full', label: 'Fixed candidate requiring full coverage', score: 65.52, diff: -2.78 },
     ],
   },
   sixteen: {
     benchmarks: 16,
     inputs: 3211,
     rows: [
-      { key: 'fixed', label: 'Fixed arm (best training mean)', score: 79.44 },
+      { key: 'fixed', label: 'Fixed candidate (best training mean)', score: 79.44 },
       { key: 'winner', label: 'Winner-label router (generative)', score: 78.87, diff: -0.58 },
       { key: 'oracle', label: 'Oracle', score: 85.77, diff: 6.33 },
     ],
@@ -318,7 +320,7 @@ export const OBJECTIVES = {
 };
 
 /* ------------------------------------------------------------------ */
-/* Finding 5 · §5.4: matched comparisons                               */
+/* Finding 5 · §4.4: matched comparisons                               */
 /* ------------------------------------------------------------------ */
 
 export const MATCHED = {
@@ -364,14 +366,14 @@ export const PRICE_ROUTES: PriceRouteRow[] = [
 
 /** Table 9: the half-point image route, test quality (0–100) and m$ per image */
 export const IMAGE_ROUTE = [
-  { bench: 'GenEval2', prompts: 160, fixed: { arm: 'GPT Image 2.5', q: 82.48, m: 208.8 }, route: { arm: 'GPT Image 2.5', q: 82.48, m: 208.8 } },
-  { bench: 'Qwen-Image-Bench', prompts: 193, fixed: { arm: 'GPT Image 2.5', q: 64.09, m: 211.1 }, route: { arm: 'Grok Imagine 2.0', q: 61.16, m: 60.0 } },
-  { bench: 'LongT2I', prompts: 543, fixed: { arm: 'MAI-Image 2.6', q: 86.14, m: 39.4 }, route: { arm: 'MAI-Image 2.6', q: 86.14, m: 39.4 } },
-  { bench: 'OneIG', prompts: 427, fixed: { arm: 'FLUX 3', q: 83.35, m: 48.0 }, route: { arm: 'Qwen-Image 3', q: 83.02, m: 40.0 } },
-  { bench: 'WISE', prompts: 192, fixed: { arm: 'Qwen-Image 3', q: 92.19, m: 40.0 }, route: { arm: 'Qwen-Image 3', q: 92.19, m: 40.0 } },
+  { bench: 'GenEval2', prompts: 160, fixed: { candidate: 'GPT Image 2.5', q: 82.48, m: 208.8 }, route: { candidate: 'GPT Image 2.5', q: 82.48, m: 208.8 } },
+  { bench: 'Qwen-Image-Bench', prompts: 193, fixed: { candidate: 'GPT Image 2.5', q: 64.09, m: 211.1 }, route: { candidate: 'Grok Imagine 2.0', q: 61.16, m: 60.0 } },
+  { bench: 'LongT2I', prompts: 543, fixed: { candidate: 'MAI-Image 2.6', q: 86.14, m: 39.4 }, route: { candidate: 'MAI-Image 2.6', q: 86.14, m: 39.4 } },
+  { bench: 'OneIG', prompts: 427, fixed: { candidate: 'FLUX 3', q: 83.35, m: 48.0 }, route: { candidate: 'Qwen-Image 3', q: 83.02, m: 40.0 } },
+  { bench: 'WISE', prompts: 192, fixed: { candidate: 'Qwen-Image 3', q: 92.19, m: 40.0 }, route: { candidate: 'Qwen-Image 3', q: 92.19, m: 40.0 } },
 ];
 
-/** §6.1, Finding 6 */
+/** §5.1, Finding 6 */
 export const PRICE_FACTS = {
   code: {
     lambdaB: 100,
@@ -392,7 +394,7 @@ export const PRICE_FACTS = {
 };
 
 /* ================================================================== */
-/* Code and text testbeds (§3, §6, Appendix C)                         */
+/* Code and text testbeds (§5, Appendix C)                             */
 /* ================================================================== */
 
 export const SETUP = {
@@ -404,7 +406,7 @@ export const SETUP = {
     test: 2919,
     dims: 9,
     cells: 21,
-    arms: 22,
+    candidates: 22,
     reference: 'claude-opus-4-6',
     refScore: 0.4383,
     refCost: 11.655, // m$ per task

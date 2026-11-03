@@ -85,7 +85,10 @@ function Check({ cx, cy, r = 7.5, s = 1 }: { cx: number; cy: number; r?: number;
   );
 }
 
-export function PriceRoutes() {
+type Part = 'routes' | 'image' | 'overhead';
+
+/** Table 5's routes, Table 9's image swaps and the router overhead; `parts` picks which to draw. */
+export function PriceRoutes({ parts = ['routes', 'image', 'overhead'] }: { parts?: Part[] }) {
   const ref = useRef<HTMLDivElement>(null);
   const W = useWidth(ref);
   const reduced = useReducedMotion();
@@ -93,9 +96,9 @@ export function PriceRoutes() {
     <div ref={ref}>
       {W > 0 && (
         <>
-          <RouteChart W={W} reduced={reduced} />
-          <ImageSwaps W={W} reduced={reduced} />
-          <Overhead W={W} reduced={reduced} />
+          {parts.includes('routes') && <RouteChart W={W} reduced={reduced} />}
+          {parts.includes('image') && <ImageSwaps W={W} reduced={reduced} />}
+          {parts.includes('overhead') && <Overhead W={W} reduced={reduced} />}
         </>
       )}
     </div>
@@ -488,7 +491,7 @@ function Key({ color, children }: { color: string; children: ReactNode }) {
 /* (b) Table 9: what the half-point image route moved                   */
 /* ------------------------------------------------------------------ */
 
-const SWITCHED = IMAGE_ROUTE.filter((r) => r.route.arm !== r.fixed.arm);
+const SWITCHED = IMAGE_ROUTE.filter((r) => r.route.candidate !== r.fixed.candidate);
 const PROMPTS = IMAGE_ROUTE.reduce((s, r) => s + r.prompts, 0);
 const ROUTE_05 = PRICE_ROUTES.find((r) => r.key === 'img-05')!;
 const fmtN = (n: number) => n.toLocaleString('en-US');
@@ -648,14 +651,14 @@ function ImageSwaps({ W, reduced }: { W: number; reduced: boolean }) {
                   <div className={`font-sans text-[13px] leading-tight ${g.moved ? 'font-semibold text-ink' : 'text-ink-2'}`}>{r.bench}</div>
                   <div className="num mt-[5px] text-[10.5px] leading-none text-ink-3">{fmtN(r.prompts)} test prompts</div>
                 </At>
-                {/* arm labels ride with their marks */}
+                {/* candidate labels ride with their marks */}
                 <At x={g.moved && g.near ? (g.xf + g.xr) / 2 + 5 : g.xf} y={g.cy - 16} anchor={g.fixedAnchor} style={{ opacity: g.show }}>
-                  <ArmTag arm={r.fixed.arm} m={r.fixed.m} tone={g.moved && g.q > 0.02 ? 'muted' : 'normal'} />
+                  <ArmTag candidate={r.fixed.candidate} m={r.fixed.m} tone={g.moved && g.q > 0.02 ? 'muted' : 'normal'} />
                 </At>
                 {g.moved && (
                   <>
                     <At x={g.near ? (g.xf + g.xr) / 2 - 5 : g.xr} y={g.cy - 16} anchor={g.routeAnchor} style={{ opacity: g.arrive }}>
-                      <ArmTag arm={r.route.arm} m={r.route.m} tone="strong" />
+                      <ArmTag candidate={r.route.candidate} m={r.route.m} tone="strong" />
                     </At>
                     <At x={g.near ? g.xf + 12 : (g.xf + g.xr) / 2} y={g.cy + (g.near ? 0 : 15)} anchor={g.near ? 'start' : 'middle'} className="num text-[10.5px] text-ink-2" style={{ opacity: g.done }}>
                       {sgn(r.route.m - r.fixed.m, 1)} m$
@@ -700,11 +703,11 @@ function ImageSwaps({ W, reduced }: { W: number; reduced: boolean }) {
                 )}
               </At>
               <At x={0} y={g.top + 31} className="font-sans text-[11.5px] text-ink-2" style={{ opacity: g.show }}>
-                {r.fixed.arm} <span className="num text-[10.5px] text-ink-3">{r.fixed.m.toFixed(1)}</span>
+                {r.fixed.candidate} <span className="num text-[10.5px] text-ink-3">{r.fixed.m.toFixed(1)}</span>
                 {g.moved ? (
                   <span style={{ opacity: g.arrive }}>
                     <span className="mx-1 text-ink-4">→</span>
-                    <span className="font-medium text-ink">{r.route.arm}</span> <span className="num text-[10.5px] text-ink-3">{r.route.m.toFixed(1)}</span>
+                    <span className="font-medium text-ink">{r.route.candidate}</span> <span className="num text-[10.5px] text-ink-3">{r.route.m.toFixed(1)}</span>
                   </span>
                 ) : (
                   <span className="text-ink-4"> · kept</span>
@@ -720,11 +723,11 @@ function ImageSwaps({ W, reduced }: { W: number; reduced: boolean }) {
   );
 }
 
-function ArmTag({ arm, m, tone }: { arm: string; m: number; tone: 'normal' | 'muted' | 'strong' }) {
+function ArmTag({ candidate, m, tone }: { candidate: string; m: number; tone: 'normal' | 'muted' | 'strong' }) {
   return (
     <span className="font-sans text-[11.5px] leading-none">
       <span className={tone === 'strong' ? 'font-medium text-ink' : tone === 'muted' ? 'text-ink-3' : 'text-ink-2'} style={{ transition: 'color .4s' }}>
-        {arm}
+        {candidate}
       </span>
       <span className="num ml-1 text-[10.5px] text-ink-3">{m.toFixed(1)}</span>
     </span>

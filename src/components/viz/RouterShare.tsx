@@ -8,7 +8,7 @@ import { mono, sans } from './svg';
 
 // Finding 2 (Table 3, Table 7). One capability-tree router over 16 benchmarks, read two ways:
 //  · by output group, as the share of the headroom it captures on a track that runs from the fixed
-//    arm (0%) to the per-input oracle (100%); the robot row is a different router (Section 5.2);
+//    candidate (0%) to the per-input oracle (100%); the robot row is a different router (Section 5.2);
 //  · by benchmark, as router − fixed in points.
 // Most of every track stays empty: that is the finding.
 
@@ -21,7 +21,7 @@ const int = (n: number) => n.toLocaleString('en-US');
 const NB = '\u00a0';
 const ival = (c: [number, number]) => `[${sgn(c[0])},${NB}${sgn(c[1])}]`;
 const short = (k: GroupKey) => GROUPS.find((g) => g.key === k)?.short ?? k;
-/** paper style: one decimal for departures, two where the router sits within 0.05 of the fixed arm */
+/** paper style: one decimal for departures, two where the router sits within 0.05 of the fixed candidate */
 const fmtD = (d: number) => (Math.abs(d) < 0.05 ? sgn(d, 2) : sgn(d, 1));
 
 /** horizontal bar from a baseline x0 to a data end x1, rounded (4px) at the data end only */
@@ -202,7 +202,7 @@ function GroupView({ w, inView, tip }: { w: number; inView: boolean; tip: TipApi
       sub={r.kind === 'all' ? `capability-tree router · ${int(r.inputs)} test inputs` : `${r.benchmarks} benchmark${r.benchmarks > 1 ? 's' : ''} · ${int(r.inputs)} test ${r.kind === 'robot' ? 'scenes' : 'inputs'}`}
       rows={[
         { key: <Key color="var(--blue)" />, value: r.router.toFixed(2), label: 'router' },
-        { key: <Key color="var(--slate)" />, value: r.fixed.toFixed(2), label: 'fixed arm' },
+        { key: <Key color="var(--slate)" />, value: r.fixed.toFixed(2), label: 'fixed candidate' },
         { key: <Key color="var(--ink-3)" kind="ring" />, value: r.oracle.toFixed(2), label: 'oracle' },
       ]}
       foot={
@@ -216,7 +216,7 @@ function GroupView({ w, inView, tip }: { w: number; inView: boolean; tip: TipApi
   );
 
   return (
-    <svg viewBox={`0 0 ${w} ${g.H}`} width={w} height={g.H} className="block h-auto w-full overflow-visible" role="group" aria-label="Share of the headroom between the fixed arm and the oracle captured by the router, per output group">
+    <svg viewBox={`0 0 ${w} ${g.H}`} width={w} height={g.H} className="block h-auto w-full overflow-visible" role="group" aria-label="Share of the headroom between the fixed candidate and the oracle captured by the router, per output group">
       {/* header */}
       <text x={0} y={12} fontSize={9.5} letterSpacing="0.14em" fill="var(--ink-3)" style={mono}>
         CAPABILITY-TREE ROUTER{g.narrow ? '' : ' · BY OUTPUT GROUP'}
@@ -300,7 +300,7 @@ function GroupView({ w, inView, tip }: { w: number; inView: boolean; tip: TipApi
               </>
             )}
 
-            {/* the headroom: fixed arm (0%) → oracle (100%) */}
+            {/* the headroom: fixed candidate (0%) → oracle (100%) */}
             <rect x={X(0)} y={cy - 6} width={Math.max(0, (X(1) - X(0)) * tTrack)} height={12} rx={6} fill="var(--surface-2)" stroke="var(--rule-2)" />
             <path d={barPath(X(0), xm, cy - 6, 12)} fill={r.share >= 0 ? 'var(--blue)' : 'var(--coral)'} />
             <line x1={X(0)} x2={X(0)} y1={cy - 11} y2={cy + 11} stroke="var(--slate)" strokeWidth={2} strokeLinecap="round" />
@@ -353,7 +353,7 @@ function GroupView({ w, inView, tip }: { w: number; inView: boolean; tip: TipApi
       {/* the one axis */}
       {ticks.map((s) => (
         <text key={s} x={X(s)} y={g.axisY + 6} textAnchor={s === 0 ? 'start' : s === 1 ? 'end' : 'middle'} dx={s === 0 ? -4 : s === 1 ? 6 : 0} fontSize={10.5} fill="var(--ink-3)" style={mono}>
-          {s === 0 ? (g.narrow ? '0%' : '0% · fixed arm') : s === 1 ? (g.narrow ? '100%' : 'oracle · 100%') : `${s * 100}%`}
+          {s === 0 ? (g.narrow ? '0%' : '0% · fixed candidate') : s === 1 ? (g.narrow ? '100%' : 'oracle · 100%') : `${s * 100}%`}
         </text>
       ))}
       <text x={(X(0) + X(1)) / 2} y={g.axisY + 25} textAnchor="middle" fontSize={11.5} fill="var(--ink-3)" style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic' }}>
@@ -368,7 +368,7 @@ function GroupView({ w, inView, tip }: { w: number; inView: boolean; tip: TipApi
 /* ---------------------------------------------------------------- */
 
 const BENCH = ROUTERS_BENCH.map((b, i) => ({ ...b, i, d: Math.round((b.router - b.fixed) * 100) / 100 })).sort((a, b) => b.d - a.d || a.i - b.i);
-/** the benchmarks on which the router stays within 0.01 points of the fixed arm (the paper: 10) */
+/** the benchmarks on which the router stays within 0.01 points of the fixed candidate (the paper: 10) */
 const SAME = BENCH.filter((b) => Math.abs(b.d) <= 0.01);
 
 function benchGeom(w: number) {
@@ -399,28 +399,28 @@ function BenchView({ w, inView, tip }: { w: number; inView: boolean; tip: TipApi
   const body = (b: (typeof BENCH)[number]) => (
     <TipBody
       title={b.bench}
-      sub={`${short(b.group)} · ${int(b.inputs)} test inputs · fixed arm ${b.fixedArm}`}
+      sub={`${short(b.group)} · ${int(b.inputs)} test inputs · fixed candidate ${b.fixedArm}`}
       rows={[
         { key: <Key color="var(--blue)" />, value: b.router.toFixed(2), label: 'router' },
-        { key: <Key color="var(--slate)" />, value: b.fixed.toFixed(2), label: 'fixed arm' },
+        { key: <Key color="var(--slate)" />, value: b.fixed.toFixed(2), label: 'fixed candidate' },
         { key: <Key color="var(--ink-3)" kind="ring" />, value: b.oracle.toFixed(2), label: 'oracle' },
       ]}
       foot={
         <>
           router − fixed <span className="num text-ink">{sgn(b.d)}</span>
-          {Math.abs(b.d) <= 0.01 && <span className="text-ink-3"> · matches the fixed arm</span>}
+          {Math.abs(b.d) <= 0.01 && <span className="text-ink-3"> · matches the fixed candidate</span>}
         </>
       }
     />
   );
 
   return (
-    <svg viewBox={`0 0 ${w} ${g.H}`} width={w} height={g.H} className="block h-auto w-full overflow-visible" role="group" aria-label="Router minus fixed arm, in points, on each of the 16 benchmarks">
+    <svg viewBox={`0 0 ${w} ${g.H}`} width={w} height={g.H} className="block h-auto w-full overflow-visible" role="group" aria-label="Router minus fixed candidate, in points, on each of the 16 benchmarks">
       <text x={0} y={12} fontSize={9.5} letterSpacing="0.14em" fill="var(--ink-3)" style={mono}>
-        {g.narrow ? 'ROUTER − FIXED, BY BENCHMARK' : 'ROUTER − FIXED ARM, BY BENCHMARK · SORTED'}
+        {g.narrow ? 'ROUTER − FIXED, BY BENCHMARK' : 'ROUTER − FIXED CANDIDATE, BY BENCHMARK · SORTED'}
       </text>
       <text x={zero} y={g.cys[0] - 19} textAnchor="middle" fontSize={9.5} letterSpacing="0.14em" fill="var(--ink-3)" style={mono}>
-        FIXED ARM
+        FIXED CANDIDATE
       </text>
 
       {/* grid + zero */}
@@ -429,7 +429,7 @@ function BenchView({ w, inView, tip }: { w: number; inView: boolean; tip: TipApi
       ))}
       <line x1={zero} x2={zero} y1={g.cys[0] - 13} y2={g.axisY - 8} stroke="var(--slate)" strokeWidth={1.5} />
 
-      {/* bracket over the benchmarks where the router sends (almost) every input to the fixed arm */}
+      {/* bracket over the benchmarks where the router sends (almost) every input to the fixed candidate */}
       {iA >= 0 && (
         <g opacity={tBr}>
           <path
@@ -440,7 +440,7 @@ function BenchView({ w, inView, tip }: { w: number; inView: boolean; tip: TipApi
             transform={`translate(${(1 - tBr) * -6},0)`}
           />
           <text x={zero + 30} y={(g.cys[iA] + g.cys[iB]) / 2 - 3} fontSize={g.narrow ? 11.5 : 12.5} fontWeight={600} fill="var(--ink-2)" style={sans}>
-            router = fixed arm
+            router = fixed candidate
           </text>
           <text x={zero + 30} y={(g.cys[iA] + g.cys[iB]) / 2 + 13} fontSize={10.5} fill="var(--ink-3)" style={mono}>
             {g.narrow ? `on ${SAME.length} of ${BENCH.length}` : `on ${SAME.length} of ${BENCH.length} benchmarks, within 0.01 points`}
@@ -524,7 +524,7 @@ function BenchView({ w, inView, tip }: { w: number; inView: boolean; tip: TipApi
         </text>
       ))}
       <text x={(X(D0) + X(D1)) / 2} y={g.axisY + 25} textAnchor="middle" fontSize={11.5} fill="var(--ink-3)" style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic' }}>
-        router − fixed arm, points
+        router − fixed candidate, points
       </text>
     </svg>
   );
@@ -549,13 +549,13 @@ function Legend({ view }: { view: View }) {
   const items: { kind: 'dot' | 'ring' | 'tick' | 'bar'; color: string; label: string }[] =
     view === 'group'
       ? [
-          { kind: 'tick', color: 'var(--slate)', label: 'fixed arm (0%)' },
+          { kind: 'tick', color: 'var(--slate)', label: 'fixed candidate (0%)' },
           { kind: 'dot', color: 'var(--blue)', label: 'router' },
           { kind: 'ring', color: 'var(--ink-3)', label: 'oracle (100%)' },
-          { kind: 'bar', color: 'var(--coral)', label: 'below the fixed arm' },
+          { kind: 'bar', color: 'var(--coral)', label: 'below the fixed candidate' },
         ]
       : [
-          { kind: 'bar', color: 'var(--blue)', label: 'router above the fixed arm' },
+          { kind: 'bar', color: 'var(--blue)', label: 'router above the fixed candidate' },
           { kind: 'bar', color: 'var(--coral)', label: 'below' },
           { kind: 'ring', color: 'var(--slate)', label: 'equal, within 0.01' },
         ];
@@ -580,17 +580,17 @@ function Facts({ w }: { w: number }) {
       big: `${toFixed[0]}–${toFixed[1]}%`,
       text: (
         <>
-          of inputs still go to the fixed arm, though the classifier is {acc[0]}–{acc[1]}% accurate over {leaves} leaves: within a benchmark one arm wins
+          of inputs still go to the fixed candidate, though the classifier is {acc[0]}–{acc[1]}% accurate over {leaves} leaves: within a benchmark one candidate wins
           almost every type.
         </>
       ),
     },
     {
-      kick: 'Other routers vs. fixed arm',
+      kick: 'Other routers vs. fixed candidate',
       big: sgn(untrained.diff),
       text: (
         <>
-          an untrained Qwen3.5-4B that names the arm itself, <span className="num text-ink-2">{ival(untrained.ci)}</span>. A rule-based tree with{' '}
+          an untrained Qwen3.5-4B that names the candidate itself, <span className="num text-ink-2">{ival(untrained.ci)}</span>. A rule-based tree with{' '}
           {ruleTree.leaves} leaves: <span className="num text-ink-2">{sgn(ruleTree.diff)}</span> <span className="num text-ink-2">{ival(ruleTree.ci)}</span>.
         </>
       ),

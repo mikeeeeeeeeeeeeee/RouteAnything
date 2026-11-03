@@ -7,8 +7,8 @@ import { useTokens } from '@/theme/tokens';
 import { mono, sans } from './svg';
 
 // Finding 1 (Table 2, Table 6): per-input headroom on the test split. Each row pairs the best fixed
-// arm per benchmark, chosen on training inputs (hollow), with the per-input oracle, the best arm on
-// each input (filled); the direct label is the gap. A tick marks the best fixed arm chosen in
+// candidate per benchmark, chosen on training inputs (hollow), with the per-input oracle, the best candidate on
+// each input (filled); the direct label is the gap. A tick marks the best fixed candidate chosen in
 // hindsight on the test inputs, wherever it differs from the training choice. Switching views
 // unfolds each output type into its benchmarks.
 
@@ -26,7 +26,7 @@ interface Info {
   title: string;
   kicker?: string;
   inputs: number;
-  arms?: string;
+  candidates?: string;
   benchmarks?: number;
   fixedArm?: string;
   hindsightArm?: string;
@@ -106,11 +106,11 @@ function buildLayout(view: View, W: number): Layout {
         kind: 'group',
         group: r.group,
         label: compact ? g.short : g.label,
-        sub: compact ? `${fmtInt(r.inputs)} inputs` : `${fmtInt(r.inputs)} inputs · ${r.arms} arms`,
+        sub: compact ? `${fmtInt(r.inputs)} inputs` : `${fmtInt(r.inputs)} inputs · ${r.candidates} candidates`,
         y: y + rh / 2,
         h: rh,
         mark: { fixed: r.fixed, hindsight: r.hindsight, oracle: r.oracle, gap: r.gap },
-        info: { title: g.label, inputs: r.inputs, arms: r.arms, benchmarks: r.benchmarks },
+        info: { title: g.label, inputs: r.inputs, candidates: r.candidates, benchmarks: r.benchmarks },
         order: order++,
         attach: false,
       });
@@ -407,7 +407,7 @@ export function HeadroomBars() {
           aria-label="Rows by"
         />
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 font-sans text-[12px] text-ink-3">
-          <LegendItem glyph="fixed" label="best fixed arm (training)" />
+          <LegendItem glyph="fixed" label="best fixed candidate (training)" />
           <LegendItem glyph="oracle" label="per-input oracle" />
           <LegendItem glyph="tick" label="best fixed in hindsight" />
         </div>
@@ -421,7 +421,7 @@ export function HeadroomBars() {
             height={H}
             className="block h-auto w-full select-none overflow-visible"
             role="group"
-            aria-label={`Per-input headroom on the test split, ${view === 'group' ? 'by output type' : 'by benchmark'}: the best fixed arm against the per-input oracle. All ${HEADROOM_ALL.benchmarks} benchmarks: ${fmt2(HEADROOM_ALL.fixed)} against ${fmt2(HEADROOM_ALL.oracle)}.`}
+            aria-label={`Per-input headroom on the test split, ${view === 'group' ? 'by output type' : 'by benchmark'}: the best fixed candidate against the per-input oracle. All ${HEADROOM_ALL.benchmarks} benchmarks: ${fmt2(HEADROOM_ALL.fixed)} against ${fmt2(HEADROOM_ALL.oracle)}.`}
           >
             {/* axis */}
             <g opacity={gridIn}>
@@ -541,7 +541,7 @@ export function HeadroomBars() {
                   <g opacity={opMarks}>
                     {/* the gap */}
                     {xo - xf > 0.5 && <rect x={xf} y={y - segH / 2} width={xo - xf} height={segH} rx={segH / 2} fill={on ? SEGMENT_ON : SEGMENT} />}
-                    {/* best fixed arm in hindsight */}
+                    {/* best fixed candidate in hindsight */}
                     {showTick && (
                       <line
                         x1={xh}
@@ -554,7 +554,7 @@ export function HeadroomBars() {
                         opacity={gapIn * opGap}
                       />
                     )}
-                    {/* best fixed arm, chosen on training inputs */}
+                    {/* best fixed candidate, chosen on training inputs */}
                     <circle cx={xf} cy={y} r={rf} fill="var(--surface)" stroke="var(--slate)" strokeWidth={2} opacity={dotIn} />
                     {/* per-input oracle */}
                     <circle cx={xo} cy={y} r={ro} fill="var(--ink)" stroke="var(--surface)" strokeWidth={2} opacity={dotIn} />
@@ -627,14 +627,14 @@ function Tip({ row, X, W, H, compact, rOr, minSep }: { row: Row; X: (v: number) 
     style = { left, top: clamp(row.y, 80, H - 80), width: TW, transform: 'translateY(-50%)' };
   }
   const bench = row.kind === 'bench';
-  const lines: { glyph: Glyph; label: string; arm?: string; value: number }[] = [
-    { glyph: 'fixed', label: 'Fixed, chosen on training inputs', arm: info.fixedArm, value: m.fixed },
-    { glyph: 'tick', label: 'Best fixed in hindsight', arm: bench ? (info.hindsightArm ?? 'the same arm') : undefined, value: m.hindsight },
-    { glyph: 'oracle', label: 'Per-input oracle', arm: bench ? 'best arm on each input' : undefined, value: m.oracle },
+  const lines: { glyph: Glyph; label: string; candidate?: string; value: number }[] = [
+    { glyph: 'fixed', label: 'Fixed, chosen on training inputs', candidate: info.fixedArm, value: m.fixed },
+    { glyph: 'tick', label: 'Best fixed in hindsight', candidate: bench ? (info.hindsightArm ?? 'the same candidate') : undefined, value: m.hindsight },
+    { glyph: 'oracle', label: 'Per-input oracle', candidate: bench ? 'best candidate on each input' : undefined, value: m.oracle },
   ];
   const facts = [
     `${fmtInt(info.inputs)} input${info.inputs === 1 ? '' : 's'}`,
-    info.arms ? `${info.arms} arms` : null,
+    info.candidates ? `${info.candidates} candidates` : null,
     info.benchmarks ? `${info.benchmarks} benchmark${info.benchmarks > 1 ? 's' : ''}` : null,
   ].filter(Boolean);
   return (
@@ -662,7 +662,7 @@ function Tip({ row, X, W, H, compact, rOr, minSep }: { row: Row; X: (v: number) 
               </span>
               <span className="min-w-0 font-sans text-[12px] leading-[16px] text-ink-2">
                 {r.label}
-                {r.arm && <span className="block truncate text-[11px] leading-[14px] text-ink-4">{r.arm}</span>}
+                {r.candidate && <span className="block truncate text-[11px] leading-[14px] text-ink-4">{r.candidate}</span>}
               </span>
               <span className="num text-[12.5px] font-medium leading-[16px] text-ink">{fmt2(r.value)}</span>
             </div>
@@ -706,12 +706,12 @@ function LegendItem({ glyph, label }: { glyph: Glyph; label: string }) {
 function SrTable() {
   return (
     <table className="sr-only">
-      <caption>Per-input headroom on the test split (Table 2 and Table 6)</caption>
+      <caption>Per-input headroom on the test split (Table 1 and Table 6)</caption>
       <thead>
         <tr>
           <th scope="col">Row</th>
           <th scope="col">Inputs</th>
-          <th scope="col">Fixed arm</th>
+          <th scope="col">Fixed candidate</th>
           <th scope="col">Fixed</th>
           <th scope="col">Best fixed in hindsight</th>
           <th scope="col">Oracle</th>
@@ -723,7 +723,7 @@ function SrTable() {
           <tr key={r.group}>
             <th scope="row">{groupLabel(r.group)}</th>
             <td>{fmtInt(r.inputs)}</td>
-            <td>{r.arms} arms</td>
+            <td>{r.candidates} candidates</td>
             <td>{fmt2(r.fixed)}</td>
             <td>{fmt2(r.hindsight)}</td>
             <td>{fmt2(r.oracle)}</td>

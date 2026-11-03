@@ -19,7 +19,7 @@ interface SectionProps {
 export function Section({ id, n, kicker, title, lede, children, className = '' }: SectionProps) {
   const tk = useTokens();
   return (
-    <section id={id} className={`relative scroll-mt-20 py-24 md:py-32 ${className}`}>
+    <section id={id} className={`relative scroll-mt-20 py-16 md:py-24 ${className}`}>
       <div className="mx-auto max-w-[1180px] px-5 md:px-8">
         <header className="grid grid-cols-1 gap-x-10 gap-y-4 md:grid-cols-[150px_minmax(0,1fr)]">
           <div className="relative h-[86px] md:h-auto">
@@ -66,7 +66,7 @@ export function Section({ id, n, kicker, title, lede, children, className = '' }
             )}
           </div>
         </header>
-        <div className="mt-14 md:mt-16">{children}</div>
+        <div className="mt-10 md:mt-12">{children}</div>
       </div>
     </section>
   );

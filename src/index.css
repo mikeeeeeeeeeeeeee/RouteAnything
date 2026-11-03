@@ -168,6 +168,12 @@
 .math-block .katex {
   font-size: 1.22em;
 }
+/* phones: display maths at body size, so equations fit the column */
+@media (max-width: 639px) {
+  .math-block .katex {
+    font-size: 1.02em;
+  }
+}
 
 /* ---------- typography helpers ---------- */
 .smallcaps {

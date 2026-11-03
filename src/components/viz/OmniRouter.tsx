@@ -6,8 +6,8 @@ import { GROUPS, MATRIX, POOLS, type PoolKey } from '@/data/results';
 import { FigTag, FlowEdge, FlowNode, Packet } from './flow';
 import { InputIcon, PoolIcon, type InputKind, type Pool } from './icons';
 
-// The paper's Fig. 1a, live: for each input the router reads, it plays one arm from the pool for that
-// output type, scoring arms by value minus priced cost. Packets are inputs; the mix of input kinds and
+// The paper's Fig. 1a, live: for each input the router reads, it plays one candidate from the pool for that
+// output type, scoring candidates by value minus priced cost. Packets are inputs; the mix of input kinds and
 // the generation targets are schematic.
 
 const W = 900;
@@ -117,7 +117,7 @@ export function OmniRouter() {
       };
     }
     const p = poolArms[POOL_ORDER[hover.i]];
-    return { at: outPos(hover.i), side: 'out' as const, title: `${p.label} · ${p.arms.length}`, lines: [p.arms.join(', '), ...(p.note ? [p.note] : [])] };
+    return { at: outPos(hover.i), side: 'out' as const, title: `${p.label} · ${p.size}`, lines: [p.candidates.join(', '), ...(p.note ? [p.note] : [])] };
   })();
 
   return (
@@ -126,7 +126,7 @@ export function OmniRouter() {
         viewBox={`0 0 ${W} ${H}`}
         className="h-auto w-full overflow-visible"
         role="img"
-        aria-label="One router reads five kinds of input (a question, an image with a question, a task with files, a generation prompt, camera frames with a robot state) and sends each to one arm from the pool for its output type: language models, image, video or speech generators, or robot policies."
+        aria-label="One router reads five kinds of input (a question, an image with a question, a task with files, a generation prompt, camera frames with a robot state) and sends each to one candidate from the pool for its output type: language models, image, video or speech generators, or robot policies."
       >
         {IN_EDGES.map((e, i) => (
           <FlowEdge key={`in-${i}`} pts={e} delay={0.1 + i * 0.06} />
@@ -143,7 +143,7 @@ export function OmniRouter() {
           WHAT THE ROUTER READS
         </text>
         <text x={OUT_X} y={20} textAnchor="middle" fontSize={11} letterSpacing={2} fill="var(--ink-3)" style={{ fontFamily: 'var(--font-mono)' }}>
-          ARM POOLS
+          CANDIDATE POOLS
         </text>
 
         {INPUTS.map((inp, i) => {
@@ -167,7 +167,7 @@ export function OmniRouter() {
           return (
             <g key={k} onMouseEnter={() => setHover({ side: 'out', i })} onMouseLeave={() => setHover(null)} style={{ cursor: 'default' }}>
               <circle cx={x} cy={y} r={R_IO + 12} fill="transparent" />
-              <FlowNode x={x} y={y} r={R_IO} caption={{ text: `${p.label} ×${p.arms.length}`, at: 'right' }} pulse={outPulse[i]} pulseTone="teal" tone={on ? 'blue' : 'idle'} />
+              <FlowNode x={x} y={y} r={R_IO} caption={{ text: `${p.label} ×${p.size}`, at: 'right' }} pulse={outPulse[i]} pulseTone="teal" tone={on ? 'blue' : 'idle'} />
               <PoolIcon pool={POOL_ICON[k]} x={x} y={y} color={on || outPulse[i] > 0.5 ? 'var(--teal)' : 'var(--ink-2)'} />
             </g>
           );
@@ -203,7 +203,7 @@ export function OmniRouter() {
       <div className="mt-2 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
         <FigTag>One router · every output type</FigTag>
         <span className="font-mono text-[11.5px] tabular-nums text-ink-3">
-          {MATRIX.benchmarks} benchmarks · {MATRIX.runs.toLocaleString('en-US')} scored runs · {MATRIX.armVersions} arm versions
+          {MATRIX.benchmarks} benchmarks · {MATRIX.runs.toLocaleString('en-US')} scored runs · {MATRIX.armVersions} candidate configurations
           <span className="text-ink-4"> · {routed} routed here</span>
         </span>
       </div>

@@ -9,7 +9,7 @@ import { mono } from './svg';
 
 // Proposition 3, measured. What a router can reach depends on what it observes:
 //   V*(σ1) ≤ V*(σ2) ≤ V*(x) ≤ E[max_u W_u].
-// The outer rungs are measured (best fixed arm, per-input oracle); inner rungs are lookups chosen in
+// The outer rungs are measured (best fixed candidate, per-input oracle); inner rungs are lookups chosen in
 // hindsight on the test inputs (dashed: optimistic) or a router that reads the state (a lower
 // bound). V*(x) itself is not measured: it sits below the oracle by outcome noise. Each panel stays
 // within one set of test inputs; the ladder's ends are drawn at the same height in every panel, so
@@ -46,7 +46,7 @@ interface Panel {
   short: string;
   axis: string;
   ticks: number[];
-  /** ascending: [0] is the fixed arm, the last the oracle */
+  /** ascending: [0] is the fixed candidate, the last the oracle */
   rungs: Rung[];
   /** the top of the "between" region */
   split: string;
@@ -66,7 +66,7 @@ const ROBOT_GAP = robot.oracle - robot.fixed;
 const ROBOT_CELL = robot.fixed + robot.perTaskCondition.shareOfGap * ROBOT_GAP;
 
 const RUNS = aaLcr.runs === 3 ? 'three' : String(aaLcr.runs);
-const NOISE = `the oracle sits above it by outcome noise that no router can predict, as on AA-LCR, where the oracle’s ${aaLcr.margin}-point margin over the fixed arm vanishes once each arm is scored by its mean over ${RUNS} runs.`;
+const NOISE = `the oracle sits above it by outcome noise that no router can predict, as on AA-LCR, where the oracle’s ${aaLcr.margin}-point margin over the fixed candidate vanishes once each candidate is scored by its mean over ${RUNS} runs.`;
 
 const band = (input: string, explainLead: string): Rung => ({
   key: 'band',
@@ -102,12 +102,12 @@ const PANELS: Record<PanelKey, Panel> = {
         term: 's1',
         sym: 'V^\\star(\\sigma_1)',
         state: 'The benchmark',
-        what: 'best arm per benchmark, from training inputs',
+        what: 'best candidate per benchmark, from training inputs',
         short: 'benchmark · training',
         value: f2(all.fixed),
         big: f2(all.fixed),
-        kicker: 'Fixed arm per benchmark · measured',
-        explain: 'Each benchmark always gets the arm with the best mean on its training inputs: the bottom rung, a router that observes only the benchmark.',
+        kicker: 'Fixed candidate per benchmark · measured',
+        explain: 'Each benchmark always gets the candidate with the best mean on its training inputs: the bottom rung, a router that observes only the benchmark.',
       },
       {
         key: 'hind',
@@ -116,12 +116,12 @@ const PANELS: Record<PanelKey, Panel> = {
         term: 's1',
         sym: 'V^\\star(\\sigma_1)',
         state: 'The benchmark, in hindsight',
-        what: 'best arm per benchmark, from the test inputs',
+        what: 'best candidate per benchmark, from the test inputs',
         short: 'benchmark · hindsight',
         value: f2(all.perBenchmark),
         big: f2(all.perBenchmark),
-        kicker: 'Best arm per benchmark · in hindsight',
-        explain: `Chosen on the test inputs themselves, the best arm per benchmark scores only ${f2(all.perBenchmark - all.fixed)} points more: the benchmark’s rung is pinned down.`,
+        kicker: 'Best candidate per benchmark · in hindsight',
+        explain: `Chosen on the test inputs themselves, the best candidate per benchmark scores only ${f2(all.perBenchmark - all.fixed)} points more: the benchmark’s rung is pinned down.`,
       },
       band('The input itself', 'No experiment measures $V^\\star(x)$, the best a router that reads each input can do;'),
       {
@@ -131,12 +131,12 @@ const PANELS: Record<PanelKey, Panel> = {
         term: 'max',
         sym: ORACLE_SYM,
         state: 'The realized outcomes',
-        what: 'per-input oracle: the best arm on each input',
+        what: 'per-input oracle: the best candidate on each input',
         short: 'per-input oracle',
         value: f2(all.oracle),
         big: f2(all.oracle),
         kicker: 'Per-input oracle · measured',
-        explain: 'Each input gets the arm that scored best on it, which takes the outcomes themselves: the top of the ladder, not a router.',
+        explain: 'Each input gets the candidate that scored best on it, which takes the outcomes themselves: the top of the ladder, not a router.',
       },
     ],
     split: 'hind',
@@ -145,7 +145,7 @@ const PANELS: Record<PanelKey, Panel> = {
     head: {
       big: `+${f2(all.perBenchmark - all.fixed)}`,
       kicker: 'Between benchmarks, in hindsight',
-      text: `Even chosen on the test inputs, the best arm per benchmark adds ${f2(all.perBenchmark - all.fixed)} points; the ${f2(all.oracle - all.fixed)}-point gap to the oracle lies within benchmarks.`,
+      text: `Even chosen on the test inputs, the best candidate per benchmark adds ${f2(all.perBenchmark - all.fixed)} points; the ${f2(all.oracle - all.fixed)}-point gap to the oracle lies within benchmarks.`,
     },
   },
   typed: {
@@ -163,12 +163,12 @@ const PANELS: Record<PanelKey, Panel> = {
         term: 's1',
         sym: 'V^\\star(\\sigma_1)',
         state: 'The benchmark',
-        what: 'best arm per benchmark, from training inputs',
+        what: 'best candidate per benchmark, from training inputs',
         short: 'benchmark · training',
         value: f2(typed.fixed),
         big: f2(typed.fixed),
-        kicker: 'Fixed arm per benchmark · measured',
-        explain: `The best arm per benchmark, chosen on training inputs, scored on the ${typed.inputs.toLocaleString('en-US')} test inputs that the rule-based tree assigns to its ${typed.leaves} capability leaves.`,
+        kicker: 'Fixed candidate per benchmark · measured',
+        explain: `The best candidate per benchmark, chosen on training inputs, scored on the ${typed.inputs.toLocaleString('en-US')} test inputs that the rule-based tree assigns to its ${typed.leaves} capability leaves.`,
       },
       {
         key: 'leaf',
@@ -177,12 +177,12 @@ const PANELS: Record<PanelKey, Panel> = {
         term: 's2',
         sym: 'V^\\star(\\sigma_2)',
         state: 'The capability leaf',
-        what: `best arm for each of ${typed.leaves} leaves, in hindsight`,
+        what: `best candidate for each of ${typed.leaves} leaves, in hindsight`,
         short: 'leaf · hindsight',
         value: f2(typed.perLeaf),
         big: f2(typed.perLeaf),
-        kicker: 'Best arm per capability leaf · in hindsight',
-        explain: `The best arm for each of the ${typed.leaves} leaves of the rule-based tree, chosen on the test inputs, an optimistic estimate of this rung: about ${pct(typed.betweenTypesShare)} of the gap.`,
+        kicker: 'Best candidate per capability leaf · in hindsight',
+        explain: `The best candidate for each of the ${typed.leaves} leaves of the rule-based tree, chosen on the test inputs, an optimistic estimate of this rung: about ${pct(typed.betweenTypesShare)} of the gap.`,
       },
       band('The input itself', 'No experiment measures $V^\\star(x)$, the best a router that reads each input can do;'),
       {
@@ -192,12 +192,12 @@ const PANELS: Record<PanelKey, Panel> = {
         term: 'max',
         sym: ORACLE_SYM,
         state: 'The realized outcomes',
-        what: 'per-input oracle: the best arm on each input',
+        what: 'per-input oracle: the best candidate on each input',
         short: 'per-input oracle',
         value: f2(typed.oracle),
         big: f2(typed.oracle),
         kicker: 'Per-input oracle · measured',
-        explain: 'Each input gets the arm that scored best on it, which takes the outcomes themselves: the top of the ladder, not a router.',
+        explain: 'Each input gets the candidate that scored best on it, which takes the outcomes themselves: the top of the ladder, not a router.',
       },
     ],
     split: 'leaf',
@@ -207,7 +207,7 @@ const PANELS: Record<PanelKey, Panel> = {
     head: {
       big: `≈${pct(typed.betweenTypesShare)}`,
       kicker: 'Of the gap lies between types',
-      text: `The best arm per capability leaf, chosen in hindsight, closes about ${pct(typed.betweenTypesShare)} of the gap between the fixed arm and the oracle; the rest lies within types.`,
+      text: `The best candidate per capability leaf, chosen in hindsight, closes about ${pct(typed.betweenTypesShare)} of the gap between the fixed candidate and the oracle; the rest lies within types.`,
     },
   },
   robot: {

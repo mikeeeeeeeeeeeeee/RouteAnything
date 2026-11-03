@@ -17,7 +17,7 @@ type Dest = 'patch' | 'medex' | 'giga' | 'rest';
 type Counts = Record<Cond, Record<Dest | 'n', number>>;
 
 const [CLEAN, RAND] = ROBOT.conditions;
-const sentTo = (c: typeof CLEAN, arm: string) => c.sentTo.find((s) => s.arm === arm)?.n ?? 0;
+const sentTo = (c: typeof CLEAN, candidate: string) => c.sentTo.find((s) => s.candidate === candidate)?.n ?? 0;
 const N_PATCH = sentTo(CLEAN, 'PatchWAM');
 const N_MEDEX = sentTo(RAND, 'ME-Dex');
 const N_GIGA = sentTo(RAND, 'GigaBrain');
@@ -560,7 +560,7 @@ function SuccessChart({ on, instant }: { on: boolean; instant: boolean }) {
           ? `sends ${N_PATCH} of ${CLEAN.scenes.toLocaleString('en-US')} to PatchWAM`
           : `sends ${N_MEDEX} to ME-Dex, ${N_GIGA} to GigaBrain`
         : s.key === 'meDex'
-          ? 'the fixed arm: best single policy'
+          ? 'the fixed candidate: best single policy'
           : null;
     return { grp, s, v, note, x: G.barX(grp.cx, tip.j) + G.bw / 2, y: sy(Math.max(v, grp.c.oracle)) - 8 };
   })();

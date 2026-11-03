@@ -6,7 +6,7 @@ import { clamp, easeOut, lerp, useInView, useReducedMotion } from '@/lib/hooks';
 import { useTokens } from '@/theme/tokens';
 import { mono, sans } from './svg';
 
-// Finding 5 (§5.4, Table 4). One outcome router, two ways of choosing the fixed arm it is compared
+// Finding 5 (§5.4, Table 4). One outcome router, two ways of choosing the fixed candidate it is compared
 // with. Requiring a score on every training input drops Opus 5.5 wherever it missed a few, so that
 // baseline falls back to the next model and scores lower. Only the baseline moves; the router's
 // difference from it changes sign.
@@ -192,14 +192,14 @@ function NumberLine({ w, p, t, tip }: { w: number; p: number; t: number; tip: Ti
       sub={`${E11.benchmarks} benchmarks · ${int(E11.inputs)} test inputs · ${E11.seeds} seeds`}
       rows={[
         { key: <Key color="var(--blue)" />, value: P.router.toFixed(2), label: 'router, either way' },
-        { key: <Key color="var(--slate)" />, value: P.matched.toFixed(2), label: 'matched fixed arm' },
-        { key: <Key color="var(--slate)" kind="dash" />, value: P.fullCoverage.toFixed(2), label: 'fixed arm requiring full coverage' },
+        { key: <Key color="var(--slate)" />, value: P.matched.toFixed(2), label: 'matched fixed candidate' },
+        { key: <Key color="var(--slate)" kind="dash" />, value: P.fullCoverage.toFixed(2), label: 'fixed candidate requiring full coverage' },
       ]}
     />
   );
   const fixedBody = (
     <TipBody
-      title={p < 0.5 ? 'Matched fixed arm' : 'Fixed arm requiring full coverage'}
+      title={p < 0.5 ? 'Matched fixed candidate' : 'Fixed candidate requiring full coverage'}
       sub={p < 0.5 ? 'Opus 5.5, with GPT-6 Astra’s outcome where Opus has none' : 'falls back to the next model where Opus 5.5 misses a score'}
       rows={[{ key: <Key color="var(--slate)" />, value: (p < 0.5 ? P.matched : P.fullCoverage).toFixed(2), label: 'pooled score' }]}
       foot={
@@ -211,7 +211,7 @@ function NumberLine({ w, p, t, tip }: { w: number; p: number; t: number; tip: Ti
   );
 
   return (
-    <svg viewBox={`0 0 ${w} 136`} width={w} height={136} className="block h-auto w-full overflow-visible" role="group" aria-label={`Pooled scores: router ${P.router}, fixed arm ${fixed.toFixed(2)}`}>
+    <svg viewBox={`0 0 ${w} 136`} width={w} height={136} className="block h-auto w-full overflow-visible" role="group" aria-label={`Pooled scores: router ${P.router}, fixed candidate ${fixed.toFixed(2)}`}>
       <g opacity={tIn}>
         {[65, 66, 67, 68, 69].map((v) => (
           <g key={v}>
@@ -240,17 +240,17 @@ function NumberLine({ w, p, t, tip }: { w: number; p: number; t: number; tip: Ti
       {/* the difference, drawn between the two marks */}
       <path d={barPath(X(fixed), X(fixed) + (X(P.router) - X(fixed)) * tC, y - 2.5, 5, 2.5)} fill={diff < 0 ? 'var(--coral)' : 'var(--blue)'} />
 
-      {/* the fixed arm: the only thing that moves */}
+      {/* the fixed candidate: the only thing that moves */}
       <g opacity={tF} transform={`translate(${X(fixed)},0)`}>
         <line x1={0} x2={0} y1={y - 13} y2={y + 13} stroke="var(--surface)" strokeWidth={6} strokeLinecap="round" />
         <line x1={0} x2={0} y1={y - 12} y2={y + 12} stroke="var(--slate)" strokeWidth={3} strokeLinecap="round" />
         <text x={0} y={y + 30} textAnchor="middle" fontSize={12} fontWeight={600} fill="var(--ink)" style={{ ...sans, ...halo }}>
-          fixed arm
+          fixed candidate
         </text>
         <text x={0} y={y + 45} textAnchor="middle" fontSize={12} fontWeight={600} fill="var(--ink)" style={{ ...mono, ...halo }}>
           {fixed.toFixed(2)}
         </text>
-        <rect x={-30} y={y - 16} width={60} height={66} fill="transparent" {...hitProps('fixed', fixedBody, `Fixed arm ${fixed.toFixed(2)}`, tip, noop)} />
+        <rect x={-30} y={y - 16} width={60} height={66} fill="transparent" {...hitProps('fixed', fixedBody, `Fixed candidate ${fixed.toFixed(2)}`, tip, noop)} />
       </g>
 
       {/* the router: stays put */}
@@ -279,22 +279,22 @@ function DiffBar({ w, p, t, tip }: { w: number; p: number; t: number; tip: TipAp
   const ciO = clamp(1 - p * 4) * phase(t, 1.3, 0.5);
   const body = (
     <TipBody
-      title="Router − fixed arm, pooled"
+      title="Router − fixed candidate, pooled"
       sub={`${E11.benchmarks} benchmarks · ${int(E11.inputs)} test inputs · ${E11.seeds} seeds`}
       rows={[
-        { key: <Key color="var(--coral)" />, value: sgn(P.vsMatched), label: `vs. matched fixed arm ${ival(OUT_CI)}` },
-        { key: <Key color="var(--blue)" />, value: sgn(P.vsFull), label: 'vs. fixed arm requiring full coverage' },
+        { key: <Key color="var(--coral)" />, value: sgn(P.vsMatched), label: `vs. matched fixed candidate ${ival(OUT_CI)}` },
+        { key: <Key color="var(--blue)" />, value: sgn(P.vsFull), label: 'vs. fixed candidate requiring full coverage' },
       ]}
     />
   );
   return (
-    <svg viewBox={`0 0 ${w} 76`} width={w} height={76} className="block h-auto w-full overflow-visible" role="group" aria-label={`Router minus fixed arm: ${sgn(P.router - fixed)} points`}>
+    <svg viewBox={`0 0 ${w} 76`} width={w} height={76} className="block h-auto w-full overflow-visible" role="group" aria-label={`Router minus fixed candidate: ${sgn(P.router - fixed)} points`}>
       {[-1, 1, 2, 3].map((d) => (
         <line key={d} x1={X(d)} x2={X(d)} y1={y - 16} y2={y + 16} stroke="var(--rule)" />
       ))}
       <line x1={X(0)} x2={X(0)} y1={y - 20} y2={y + 18} stroke="var(--slate)" strokeWidth={2} strokeLinecap="round" />
       <text x={X(0)} y={y - 25} textAnchor="middle" fontSize={9.5} letterSpacing="0.14em" fill="var(--ink-3)" style={mono}>
-        FIXED ARM
+        FIXED CANDIDATE
       </text>
       <path d={barPath(X(0), X(diff), y - 8, 16)} fill={diff < 0 ? 'var(--coral)' : 'var(--blue)'} />
       <g opacity={ciO}>
@@ -307,7 +307,7 @@ function DiffBar({ w, p, t, tip }: { w: number; p: number; t: number; tip: TipAp
           {d > 0 ? `+${d}` : d < 0 ? `${MINUS}${-d}` : '0'}
         </text>
       ))}
-      <rect x={0} y={y - 18} width={w} height={36} fill="transparent" {...hitProps('diff', body, 'Router minus fixed arm', tip, noop)} />
+      <rect x={0} y={y - 18} width={w} height={36} fill="transparent" {...hitProps('diff', body, 'Router minus fixed candidate', tip, noop)} />
     </svg>
   );
 }
@@ -318,7 +318,7 @@ function Readout({ p, t }: { p: number; t: number }) {
   const neg = diff < -0.0049;
   return (
     <div style={{ opacity: phase(t, 0.5, 0.6) }}>
-      <Kicker>Router − fixed arm</Kicker>
+      <Kicker>Router − fixed candidate</Kicker>
       <div className="mt-1.5 flex items-baseline gap-2">
         <span className="font-display text-[54px] font-semibold leading-none text-ink" style={{ fontVariantNumeric: 'lining-nums tabular-nums' }}>
           {sgn(diff)}
@@ -368,7 +368,7 @@ function Slopes({ w, p, t, tip }: { w: number; p: number; t: number; tip: TipApi
   const tLine = phase(t, 0.3, 0.9);
   const active = p < 0.5 ? 0 : 1;
   return (
-    <svg viewBox={`0 0 ${w} 232`} width={w} height={232} className="block h-auto w-full overflow-visible" role="group" aria-label="Fixed arm's score on HLE and AA-Omniscience, matched and requiring full coverage">
+    <svg viewBox={`0 0 ${w} 232`} width={w} height={232} className="block h-auto w-full overflow-visible" role="group" aria-label="Fixed candidate's score on HLE and AA-Omniscience, matched and requiring full coverage">
       {['matched', 'full coverage'].map((h, j) => (
         <g key={h}>
           <text x={j ? XR : XL} y={14} textAnchor="middle" fontSize={12} fontWeight={active === j ? 650 : 400} fill={active === j ? 'var(--ink)' : 'var(--ink-3)'} style={sans}>
@@ -389,7 +389,7 @@ function Slopes({ w, p, t, tip }: { w: number; p: number; t: number; tip: TipApi
         const body = (
           <TipBody
             title={e.bench}
-            sub="fixed arm’s test score"
+            sub="fixed candidate’s test score"
             rows={[
               { key: <Key color="var(--slate)" />, value: e.matched.toFixed(2), label: 'matched' },
               { key: <Key color="var(--slate)" kind="dash" />, value: e.fullCoverage.toFixed(2), label: 'requiring full coverage' },
@@ -470,7 +470,7 @@ function Missing({ t, tip }: { t: number; tip: TipApi }) {
         <span className="h-full" style={{ width: `${(missed / of) * 100}%`, minWidth: 3, background: 'var(--coral)', borderRadius: '0 4px 4px 0', opacity: grow >= 1 ? 1 : 0, transition: 'opacity .3s' }} />
       </div>
       <p className="mt-2.5 font-sans text-[12px] leading-snug text-ink-3">
-        Missing a few scores on {MATCHED.benchmarksWithMissing} benchmarks, it fails the full-coverage rule there. The matched arm uses{' '}
+        Missing a few scores on {MATCHED.benchmarksWithMissing} benchmarks, it fails the full-coverage rule there. The matched candidate uses{' '}
         {MATCHED.fallbackArm}&rsquo;s outcome where Opus 5.5 has none, as the routers do.
       </p>
     </div>
@@ -520,7 +520,7 @@ export function BaselineArtifact() {
   return (
     <div ref={box} className="relative">
       <div className="mb-6 flex flex-wrap items-center gap-x-3 gap-y-2">
-        <Kicker>Fixed arm</Kicker>
+        <Kicker>Fixed candidate</Kicker>
         <RubberSegment
           items={[
             { value: 'matched', label: 'Matched' },
@@ -537,7 +537,7 @@ export function BaselineArtifact() {
           activeTextColor={tk.bg}
           size="sm"
           className="font-sans"
-          aria-label="How the fixed arm is chosen"
+          aria-label="How the fixed candidate is chosen"
         />
       </div>
 
@@ -553,7 +553,7 @@ export function BaselineArtifact() {
           </div>
         </div>
         <div ref={rightRef} style={wide ? { paddingLeft: 30, borderLeft: '1px solid var(--rule)' } : { marginTop: 28, paddingTop: 24, borderTop: '1px solid var(--rule)' }}>
-          <Kicker>Fixed arm on two of the {MATCHED.benchmarksWithMissing} benchmarks</Kicker>
+          <Kicker>Fixed candidate on two of the {MATCHED.benchmarksWithMissing} benchmarks</Kicker>
           <div className="mt-3">
             <Slopes w={wr - (wide ? 30 : 0)} p={p} t={t} tip={api} />
           </div>

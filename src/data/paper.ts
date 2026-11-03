@@ -1,14 +1,15 @@
-// Paper metadata. The paper is not posted yet, so `released` stays false and every link renders as a
-// "soon" pill. The known addresses are kept here: going live is a one-line change.
+// Paper metadata, from the 2026-11-03 PDF. The paper is not on arXiv yet, so `released` stays false and
+// the Paper and arXiv pills read "soon"; going live is filling in `pdf` and `arxiv` and flipping it.
+// Code and data are public already and link now.
 
 export const released = false;
 
 export const paper = {
   title: 'Route Anything',
-  subtitle: 'an attempt for AGI through a simple omni-modal router',
+  subtitle: 'A Study of Model and Policy Routing for General-Purpose AI Systems',
   lab: 'InfRec · Cardinal AI Lab',
-  date: 'October 2026',
-  dateISO: '2026-10-24',
+  date: 'November 2026',
+  dateISO: '2026-11-03',
   question: 'How much can routing gain, what do learned routers recover, and when does routing pay through price?',
   links: {
     pdf: '',
@@ -47,14 +48,14 @@ export const affiliations = [
 ];
 
 export const abstract =
-  'A router picks, for each input, which language model, image, video, or speech generator, or robot policy should run. We study routing across modalities on an outcome matrix that runs every arm of a pool on the same inputs: 25 benchmarks spanning text and image understanding, image, video, and speech generation, code and workplace agents, and robot manipulation, with 374,401 scored runs of 452 arm versions. We also develop a unified routing theory to organize the evidence. At a resource price, the best router plays, in each state it observes, the arm with the highest value minus priced cost, and a reference policy with a quality tolerance fixes that price. What a router observes bounds what it can reach, on a ladder from the best fixed arm through the best arm per task type to the per-input oracle. On held-out inputs, the per-input oracle beats the best fixed arm per benchmark by 5.4 points, and by 18–19 points for video generation and robot manipulation. Most of this gap lies within task types: on 18 benchmarks with labeled capability types, the best arm per type, chosen in hindsight, closes only 8% of it. Learned routers follow this ladder: across 16 benchmarks they match the best fixed arm and capture 6% of the headroom, with gains on agents, video, and image generation; on robot manipulation, a router that reads the camera frames matches the better policy in each scene condition with 24% less policy time. Regressing each arm’s outcome succeeds where predicting the winning arm fails (71.6% versus 42.8% robot success), and a fixed baseline that drops models with missing scores turns a router’s 0.4-point loss into a 2.4-point gain. Routing pays most through price: at near-zero quality loss, it raises efficiency 25.5× on code, 7.1× on text QA, and 1.35× on image generation.';
+  'Artificial general intelligence (AGI) requires the method that can understand, generate, reason, and act across diverse domains and modalities. Rather than relying on a single model to master every capability, a promising path toward AGI is to orchestrate a heterogeneous ecosystem of specialized models, tools, and policies into a unified intelligent system. At the heart of this vision lies a fundamental question: how can an AI system dynamically select and coordinate the right capabilities for each task while balancing performance and computational cost? In this work, we present Route Anything, a unified framework for studying model and policy routing across general-purpose AI systems. We develop a unified theoretical foundation that characterizes optimal routing under quality–cost trade-offs and establishes how the information available to a router determines its attainable performance. To systematically investigate routing across diverse capabilities, we construct an omni-modal trajectory matrix spanning 25 benchmarks across language understanding, image, video, and speech generation, coding and workplace agents, and robotic manipulation, comprising 374,401 scored runs from 452 candidate configurations. Building on this framework, we investigate the potential of routing, the capabilities of learned routers, and the conditions under which routing improves efficiency. Our results reveal substantial opportunities for capability orchestration: per-input oracle routing improves performance by 5.4 points over the best fixed candidate, while learned routers recover only a small fraction of this potential. More importantly, routing enables significant efficiency gains at near-zero quality loss, reaching up to 25.5× on coding tasks and 7.1× on text question answering.';
 
 /** Placeholder until the arXiv identifier exists. */
 export const bibtex = `@misc{zhou2026routeanything,
-  title         = {Route Anything: an attempt for {AGI} through a simple omni-modal router},
+  title         = {Route Anything: A Study of Model and Policy Routing for General-Purpose {AI} Systems},
   author        = {Zhou, Pengfei and Ma, Yixing and Wang, Hexin and Tang, Weidong and Wan, Zhenglin and Zhao, Wangbo and You, Yang},
   year          = {2026},
-  month         = oct,
+  month         = nov,
   note          = {Technical report},
   archivePrefix = {arXiv},
   eprint        = {2610.xxxxx}

@@ -28,7 +28,7 @@ export function MemoryPriors() {
             </div>
             {[
               { k: 'pred', v: p.predicted, label: 'predicted, Eq. (13)', solid: false, ci: null as null | [number, number] },
-              { k: 'real', v: p.realized[0], label: 'realised on test', solid: true, ci: [p.realized[1], p.realized[2]] as [number, number] },
+              { k: 'real', v: p.realized[0], label: 'realized on test', solid: true, ci: [p.realized[1], p.realized[2]] as [number, number] },
             ].map((r, j) => (
               <div key={r.k} className="grid grid-cols-[128px_minmax(0,1fr)] items-center gap-3 py-1">
                 <span className="font-sans text-[12px] text-ink-3">{r.label}</span>

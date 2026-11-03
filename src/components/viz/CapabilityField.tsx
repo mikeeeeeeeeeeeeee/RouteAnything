@@ -6,13 +6,13 @@ import { tex } from '@/lib/tex';
 import { TexLabel } from './svg';
 import { PoolIcon, type Pool } from './icons';
 
-// Fig. 00, the capability field. One router sits among arms of every output type: language models,
-// image, video and speech generators, and robot policies (ten of the matrix's 23 arms are drawn).
-// Each round an input arrives, the router scores every arm by value minus priced cost given what it
-// observes, and plays the best. The three rounds act out the paper's three questions: the best arm
+// Fig. 00, the capability field. One router sits among candidates of every output type: language models,
+// image, video and speech generators, and robot policies (ten of the matrix's 23 candidates are drawn).
+// Each round an input arrives, the router scores every candidate by value minus priced cost given what it
+// observes, and plays the best. The three rounds act out the paper's three questions: the best candidate
 // changes from input to input (gain), a router that reads camera frames follows the better policy
 // in each scene (recover), and at a price a cheaper generator wins inside the floor (pay).
-// Positions are schematic; the arm names and the facts in the hover cards are the paper's.
+// Positions are schematic; the candidate names and the facts in the hover cards are the paper's.
 
 const W = 760;
 const H = 640;
@@ -23,7 +23,7 @@ const R_NODE = 23;
 const RINGS = [104, 152, 202, 254, 308, 366];
 const SWEEP_PERIOD = 7.5;
 
-interface Arm {
+interface Candidate {
   id: number;
   short: string;
   name: string;
@@ -33,24 +33,24 @@ interface Arm {
   r: number;
 }
 
-const ARMS: Arm[] = [
-  { id: 1, short: 'OPUS 5.5', name: 'Claude Opus 5.5 · language model', pool: 'language', fact: 'The best fixed arm on most text, image-text and agent benchmarks.', angle: -162, r: 252 },
-  { id: 2, short: 'GPT-6.1 SOL', name: 'GPT-6.1 Sol · language model', pool: 'language', fact: 'The fixed arm on GDP.pdf, and the best arm in hindsight on AA-Briefcase.', angle: -134, r: 260 },
+const CANDIDATES: Candidate[] = [
+  { id: 1, short: 'OPUS 5.5', name: 'Claude Opus 5.5 · language model', pool: 'language', fact: 'The best fixed candidate on most text, image-text and agent benchmarks.', angle: -162, r: 252 },
+  { id: 2, short: 'GPT-6.1 SOL', name: 'GPT-6.1 Sol · language model', pool: 'language', fact: 'The fixed candidate on GDP.pdf, and the best candidate in hindsight on AA-Briefcase.', angle: -134, r: 260 },
   { id: 3, short: 'GPT IMAGE 2.5', name: 'GPT Image 2.5 · image generator', pool: 'image', fact: 'Best on GenEval2 and Qwen-Image-Bench, at $0.21 an image: 3.5–5.4× the other generators.', angle: -104, r: 262 },
   { id: 4, short: 'GROK IMAGINE 2.0', name: 'Grok Imagine 2.0 · image generator', pool: 'image', fact: '60 m$ an image. The half-point price route moves Qwen-Image-Bench here.', angle: -76, r: 250 },
   { id: 5, short: 'MINIMAX H3', name: 'MiniMax H3 · video generator', pool: 'video', fact: 'The best fixed video generator: 62.43 on VBench-2.0, where the per-input oracle reaches 81.36.', angle: -16, r: 258 },
-  { id: 6, short: 'SEEDANCE 2.5', name: 'Seedance 2.5 · video generator', pool: 'video', fact: 'One of three video generators. No video arm dominates: the per-input headroom is 18.9 points.', angle: 16, r: 252 },
+  { id: 6, short: 'SEEDANCE 2.5', name: 'Seedance 2.5 · video generator', pool: 'video', fact: 'One of three video generators. No video candidate dominates: the per-input headroom is 18.9 points.', angle: 16, r: 252 },
   { id: 7, short: 'FISH S2.1', name: 'Fish S2.1 Pro · speech generator', pool: 'speech', fact: 'The fixed speech generator and among the cheapest (0.9–1.1 m$), so there is nothing to trade.', angle: 52, r: 252 },
   { id: 8, short: 'GEMINI 3.8 TTS', name: 'Gemini 3.8 Flash TTS · speech generator', pool: 'speech', fact: 'Best in hindsight on Seed-TTS (en), by 0.02 points: speech headroom is 0.7 points.', angle: 86, r: 250 },
   { id: 9, short: 'ME-DEX', name: 'ME-Dex · robot policy', pool: 'robot', fact: 'The best single policy (70.45%), and the better one on domain-randomized scenes (62.5%).', angle: 124, r: 254 },
   { id: 10, short: 'PATCHWAM', name: 'PatchWAM · robot policy', pool: 'robot', fact: 'Second overall (63.65%), but the better policy on clean scenes (81.7%).', angle: 172, r: 250 },
 ];
 
-const ARM = Object.fromEntries(ARMS.map((a) => [a.id, a])) as Record<number, Arm>;
-const pos = (m: Arm): Pt => [C[0] + m.r * Math.cos((m.angle * Math.PI) / 180), C[1] + m.r * Math.sin((m.angle * Math.PI) / 180)];
-const NODE = Object.fromEntries(ARMS.map((m) => [m.id, pos(m)])) as Record<number, Pt>;
+const CANDIDATE = Object.fromEntries(CANDIDATES.map((a) => [a.id, a])) as Record<number, Candidate>;
+const pos = (m: Candidate): Pt => [C[0] + m.r * Math.cos((m.angle * Math.PI) / 180), C[1] + m.r * Math.sin((m.angle * Math.PI) / 180)];
+const NODE = Object.fromEntries(CANDIDATES.map((m) => [m.id, pos(m)])) as Record<number, Pt>;
 
-/** straight route from the router's inner ring to an arm's edge */
+/** straight route from the router's inner ring to a candidate's edge */
 function route(id: number, r0 = R_INNER + 4): Pt[] {
   const p = NODE[id];
   const dx = p[0] - C[0];
@@ -153,11 +153,11 @@ export function CapabilityField({ className = '', onFocus }: Props) {
     if (scenario === 'gain') {
       return {
         arrive: 'A question arrives',
-        think: 'Every arm is scored: value minus priced cost',
+        think: 'Every candidate is scored: value minus priced cost',
         price: '',
         go: 'This input goes to GPT-6.1 Sol',
-        ok: 'The best arm changes from input to input',
-        settle: 'Per input, the oracle gains 5.4 points over the best fixed arm',
+        ok: 'The best candidate changes from input to input',
+        settle: 'Per input, the oracle gains 5.4 points over the best fixed candidate',
       }[phase];
     }
     if (scenario === 'recover') {
@@ -172,7 +172,7 @@ export function CapabilityField({ className = '', onFocus }: Props) {
     }
     return {
       arrive: 'An image prompt arrives',
-      think: 'At a price, each arm is worth value minus priced cost',
+      think: 'At a price, each candidate is worth value minus priced cost',
       price: 'GPT Image 2.5 costs 211 m$ an image',
       go: 'Grok Imagine 2.0, at 60 m$, wins at this price',
       ok: 'Inside the quality floor',
@@ -197,8 +197,8 @@ export function CapabilityField({ className = '', onFocus }: Props) {
       dim = t >= DRAW[0] + sh + 0.3;
       pulse = pulseAt(t, DRAW[0] + 0.3, 0.7);
     }
-    // the sweep lights each arm as it passes
-    const m = ARM[id];
+    // the sweep lights each candidate as it passes
+    const m = CANDIDATE[id];
     const behind = (((sweep - m.angle) % 360) + 360) % 360;
     const lit = Math.max(0, 1 - behind / 46);
     return { tone, pulse, dim, lit };
@@ -251,14 +251,14 @@ export function CapabilityField({ className = '', onFocus }: Props) {
         <div className="font-mono text-[11.5px] uppercase tracking-[0.2em] text-ink-2">
           Fig. 00 <span className="ml-3 text-ink-3">The capability field</span>
         </div>
-        <div className="font-mono text-[10.5px] uppercase tracking-[0.18em] text-ink-4">Schematic · 10 of the matrix’s 23 arms</div>
+        <div className="font-mono text-[10.5px] uppercase tracking-[0.18em] text-ink-4">Schematic · 10 of the matrix’s 23 candidates</div>
       </div>
       <div ref={ref} className="relative w-full select-none [container-type:inline-size]" style={{ aspectRatio: `${W} / ${H}` }}>
         <svg
           viewBox={`0 0 ${W} ${H}`}
           className="absolute inset-0 h-full w-full overflow-visible"
           role="img"
-          aria-label="Animated schematic: one router among arms of every output type, from language models to image, video and speech generators and robot policies. An input arrives, every arm is scored by value minus priced cost, and the router plays the best: a question goes to a language model, a robot scene to the policy that suits it, and an image prompt to a cheaper generator at a price."
+          aria-label="Animated schematic: one router among candidates of every output type, from language models to image, video and speech generators and robot policies. An input arrives, every candidate is scored by value minus priced cost, and the router plays the best: a question goes to a language model, a robot scene to the policy that suits it, and an image prompt to a cheaper generator at a price."
         >
           <defs>
             <radialGradient id="cf-fade" cx={C[0] / W} cy={C[1] / H} r="0.62">
@@ -313,7 +313,7 @@ export function CapabilityField({ className = '', onFocus }: Props) {
             })}
 
           {/* spokes: while the router scores, every one of them carries a signal out */}
-          {ARMS.map((m, i) => {
+          {CANDIDATES.map((m, i) => {
             const pts = route(m.id);
             const chosen = m.id === target && t >= DRAW[0] + sh;
             const hovered = hover === m.id;
@@ -399,8 +399,8 @@ export function CapabilityField({ className = '', onFocus }: Props) {
             </g>
           )}
 
-          {/* arms */}
-          {ARMS.map((m) => {
+          {/* candidates */}
+          {CANDIDATES.map((m) => {
             const [x, y] = NODE[m.id];
             const s = nodeState(m.id);
             const toneColor = s.tone === 'blue' ? 'var(--blue)' : s.tone === 'amber' ? 'var(--amber)' : s.tone === 'teal' ? 'var(--teal)' : null;
@@ -475,8 +475,8 @@ export function CapabilityField({ className = '', onFocus }: Props) {
               transition={{ type: 'spring', stiffness: 420, damping: 30 }}
               className="rounded-2xl border border-rule bg-surface/95 p-3.5 shadow-[var(--shadow-lg)] backdrop-blur-md"
             >
-              <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-accent">{ARM[hover].name}</div>
-              <p className="mt-1.5 font-serif text-[13.5px] leading-snug text-ink-2">{ARM[hover].fact}</p>
+              <div className="font-mono text-[11px] uppercase tracking-[0.14em] text-accent">{CANDIDATE[hover].name}</div>
+              <p className="mt-1.5 font-serif text-[13.5px] leading-snug text-ink-2">{CANDIDATE[hover].fact}</p>
             </motion.div>
           </div>
         )}

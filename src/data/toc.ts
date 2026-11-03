@@ -6,23 +6,17 @@ export interface TocItem {
 }
 
 export const TOC: TocItem[] = [
-  { id: 'overview', label: 'Overview', group: 0 },
-  { id: 'value', label: '§1  A router’s value', group: 1 },
-  { id: 'optimal', label: '§2  Optimal routing', group: 1 },
-  { id: 'ladder', label: '§3  The headroom ladder', group: 1 },
-  { id: 'targets', label: '§4  What to learn', group: 1 },
-  { id: 'floor', label: '§5  The certified floor', group: 1 },
-  { id: 'findings', label: 'Seven findings', group: 2 },
-  { id: 'matrix', label: '§6  The outcome matrix', group: 2 },
-  { id: 'headroom', label: '§7  Headroom', group: 2 },
-  { id: 'routers', label: '§8  Learned routers', group: 2 },
-  { id: 'price', label: '§9  Price', group: 2 },
+  { id: 'overview', label: '§1  Three questions', group: 0 },
+  { id: 'theory', label: '§2  A router’s value', group: 1 },
+  { id: 'gain', label: '§3  How much can routing gain?', group: 2 },
+  { id: 'recover', label: '§4  What do routers recover?', group: 2 },
+  { id: 'pay', label: '§5  When does routing pay?', group: 2 },
   { id: 'cite', label: 'Conclusion & cite', group: 3 },
 ];
 
 export const TOP_NAV = [
   { label: 'Overview', target: 'top' },
-  { label: 'Theory', target: 'value' },
-  { label: 'Findings', target: 'findings' },
+  { label: 'Theory', target: 'theory' },
+  { label: 'Findings', target: 'gain' },
   { label: 'Cite', target: 'cite' },
 ];

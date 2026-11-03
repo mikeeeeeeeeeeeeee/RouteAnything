@@ -2,7 +2,6 @@ import { useRef, useState, type ReactNode } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import SpotlightCard from '@/components/reactbits/SpotlightCard/SpotlightCard';
 import BorderGlow from '@/components/reactbits/BorderGlow/BorderGlow';
-import DecryptedText from '@/components/reactbits/DecryptedText/DecryptedText';
 import { useSymDelegation } from '@/components/math/Sym';
 import { useTheme } from '@/theme/ThemeProvider';
 import { useTokens } from '@/theme/tokens';
@@ -21,6 +20,8 @@ interface Props {
   proof?: ReactNode;
   /** the paper's main theorem gets the glowing border */
   main?: boolean;
+  /** tighter padding and type, for statements set inside a tab pane */
+  compact?: boolean;
   className?: string;
 }
 
@@ -28,7 +29,7 @@ interface Props {
  * A formal result, set as a plate. The label decrypts in when it scrolls into view; the statement
  * keeps the paper's wording; the proof idea unfolds like a folded sheet.
  */
-export function Statement({ kind, n, name, source, id, children, proof, main = false, className = '' }: Props) {
+export function Statement({ kind, n, name, source, id, children, proof, main = false, compact = false, className = '' }: Props) {
   const { theme } = useTheme();
   const tk = useTokens();
   const bodyRef = useRef<HTMLDivElement>(null);
@@ -39,12 +40,12 @@ export function Statement({ kind, n, name, source, id, children, proof, main = f
     <div ref={bodyRef} className="relative">
       <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1 border-b border-dashed border-rule-2 pb-4">
         <span className="smallcaps text-[12px] font-semibold text-accent">
-          <DecryptedText text={`${kind} ${n}`} animateOn="view" sequential speed={38} characters="ΣΦΛΔΘΠΨΩαβγδεηκλμπστφ∂∇∞≤≥" />
+          {kind} {n}
         </span>
-        <span className="font-display text-[23px] font-semibold italic leading-tight text-ink">{name}</span>
+        <span className={`font-display font-semibold italic leading-tight text-ink ${compact ? 'text-[21px]' : 'text-[23px]'}`}>{name}</span>
         {source && <span className="smallcaps ml-auto text-[10px] text-ink-3">{source}</span>}
       </div>
-      <div className="statement-body pt-5 font-serif text-[17px] leading-[1.7] text-ink">{children}</div>
+      <div className={`statement-body font-serif text-ink ${compact ? 'pt-4 text-[16px] leading-[1.65]' : 'pt-5 text-[17px] leading-[1.7]'}`}>{children}</div>
       {proof && (
         <div className="mt-5">
           <button
@@ -112,7 +113,7 @@ export function Statement({ kind, n, name, source, id, children, proof, main = f
           fillOpacity={theme === 'dark' ? 0.35 : 0.18}
           animated
         >
-          <div className="p-6 md:p-8">{inner}</div>
+          <div className={compact ? 'p-5 md:p-6' : 'p-6 md:p-8'}>{inner}</div>
         </BorderGlow>
       </div>
     );
@@ -126,7 +127,7 @@ export function Statement({ kind, n, name, source, id, children, proof, main = f
         intensity={theme === 'dark' ? 0.1 : 0.06}
         spotlightSize={420}
         borderGlow={0.5}
-        className="!rounded-[22px] !p-6 md:!p-8"
+        className={compact ? '!rounded-[22px] !p-5 md:!p-6' : '!rounded-[22px] !p-6 md:!p-8'}
         style={cardStyle}
       >
         {inner}

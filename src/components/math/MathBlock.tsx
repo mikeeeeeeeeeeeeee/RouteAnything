@@ -41,7 +41,7 @@ export function MathBlock({ children, n, id, className = '', compact = false }: 
         className={`overflow-x-auto no-scrollbar text-center text-ink ${compact ? '[&_.katex]:text-[1.02em]' : ''}`}
         dangerouslySetInnerHTML={{ __html: tex(children, true) }}
       />
-      <div className="flex min-w-[52px] items-center justify-end gap-2">
+      <div className="flex min-w-[30px] items-center justify-end gap-2 sm:min-w-[52px]">
         <button
           type="button"
           onClick={copy}

@@ -1,7 +1,9 @@
-import { useEffect, useRef, useState, type RefObject } from 'react';
+import { useContext, useEffect, useRef, useState, type RefObject } from 'react';
+import { PaneActive } from './pane';
 
-/** true while the element is (near) the viewport */
+/** true while the element is (near) the viewport, and its tab pane, if any, is showing */
 export function useInView<T extends Element>(ref: RefObject<T | null>, rootMargin = '120px', once = false) {
+  const paneActive = useContext(PaneActive);
   const [inView, setInView] = useState(false);
   useEffect(() => {
     const el = ref.current;
@@ -18,7 +20,7 @@ export function useInView<T extends Element>(ref: RefObject<T | null>, rootMargi
     io.observe(el);
     return () => io.disconnect();
   }, [ref, rootMargin, once]);
-  return inView;
+  return inView && paneActive;
 }
 
 /**
@@ -47,6 +49,19 @@ export function useClock(running: boolean, speed = 1) {
     setT(to);
   };
   return [t, reset] as const;
+}
+
+/** true on phone-width screens (below 640 px) */
+export function useNarrow() {
+  const q = '(max-width: 639px)';
+  const [narrow, setNarrow] = useState(() => window.matchMedia(q).matches);
+  useEffect(() => {
+    const m = window.matchMedia(q);
+    const on = () => setNarrow(m.matches);
+    m.addEventListener('change', on);
+    return () => m.removeEventListener('change', on);
+  }, []);
+  return narrow;
 }
 
 export function useReducedMotion() {

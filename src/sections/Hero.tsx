@@ -57,7 +57,7 @@ export function Hero() {
             </motion.div>
 
             <motion.p {...rise(0.28)} className="mt-5 font-serif text-[clamp(20px,2vw,26px)] italic leading-snug text-ink-2">
-              {paper.subtitle.replace('omni-modal', 'omni\u2011modal')}
+              {paper.subtitle}
             </motion.p>
 
             <motion.div {...rise(0.34)} className="mt-4 max-w-[560px]">
@@ -84,8 +84,8 @@ export function Hero() {
             </motion.div>
 
             <motion.p {...rise(0.42)} className="mt-4 max-w-[540px] font-serif text-[17px] leading-[1.62] text-ink-2">
-              A router picks, for each input, which model, generator or robot policy should run. The paper measures where that choice
-              pays, and why.
+              Rather than one model that masters every capability, a router sends each input to the model, tool or policy that handles it
+              best. The paper studies that choice across modalities, in theory and on 374,401 scored runs.
             </motion.p>
 
             <motion.div {...rise(0.52)} data-og-hide className="mt-5 flex flex-col items-start gap-1.5">
@@ -166,8 +166,8 @@ export function Hero() {
                 links={[
                   { label: 'Paper', href: live(paper.links.pdf), icon: 'pdf' },
                   { label: 'arXiv', href: live(paper.links.arxiv), icon: 'arxiv' },
-                  { label: 'Code', href: live(paper.links.code), icon: 'code' },
-                  { label: 'Data', href: live(paper.links.data), icon: 'data' },
+                  { label: 'Code', href: paper.links.code, icon: 'code' },
+                  { label: 'Data', href: paper.links.data, icon: 'data' },
                 ]}
               />
             </motion.div>
