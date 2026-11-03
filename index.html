@@ -11,7 +11,7 @@
     <link rel="canonical" href="https://mikeeeeeeeeeeeeee.github.io/RouteAnything/" />
     <link rel="icon" type="image/png" href="./favicon.png" />
     <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
-    <meta name="theme-color" content="#faf8f4" />
+    <meta name="theme-color" content="#ffffff" />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://mikeeeeeeeeeeeeee.github.io/RouteAnything/" />
     <meta property="og:title" content="Route Anything: A Study of Model and Policy Routing for General-Purpose AI Systems" />
@@ -25,11 +25,11 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:image" content="https://mikeeeeeeeeeeeeee.github.io/RouteAnything/og-image.png" />
     <script>
-      // a visitor's saved choice wins, then the OS setting; set before paint so there is no flash
+      // light unless the visitor chose dark; set before paint so there is no flash
       (function () {
         try {
           var s = localStorage.getItem('ra-theme');
-          var t = s === 'dark' || s === 'light' ? s : window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+          var t = s === 'dark' ? 'dark' : 'light';
           document.documentElement.classList.toggle('dark', t === 'dark');
           document.documentElement.style.colorScheme = t;
         } catch (e) {}
@@ -39,9 +39,9 @@
   <body>
     <div id="root"></div>
     <noscript>
-      <div style="max-width: 640px; margin: 80px auto; font-family: Georgia, serif; line-height: 1.6; padding: 0 24px">
-        <h1>Route Anything: Quality–Cost Tradeoffs in Model Routing</h1>
-        <p>The InfRec Research Team. This interactive page needs JavaScript.</p>
+      <div style="max-width: 640px; margin: 80px auto; font-family: -apple-system, 'Helvetica Neue', Arial, sans-serif; line-height: 1.5; padding: 0 24px">
+        <h1>Route Anything: A Study of Model and Policy Routing for General-Purpose AI Systems</h1>
+        <p>Pengfei Zhou, Yixing Ma, Hexin Wang, Weidong Tang, Zhenglin Wan, Wangbo Zhao, Yang You. This page needs JavaScript.</p>
       </div>
     </noscript>
     <script type="module" src="/src/main.tsx"></script>

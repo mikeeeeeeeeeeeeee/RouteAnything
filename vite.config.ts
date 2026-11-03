@@ -6,8 +6,8 @@ import tailwindcss from '@tailwindcss/vite';
 import { viteSingleFile } from 'vite-plugin-singlefile';
 
 /**
- * Fontsource ships Cyrillic, Greek and Vietnamese subsets too; the page only sets Latin text
- * (Greek letters are math and go through KaTeX), so keep the latin + latin-ext faces.
+ * Fontsource ships Cyrillic, extended Greek and Vietnamese subsets too. The page sets Latin text with Greek
+ * variables (λ, η, ε, α), so keep the latin, latin-ext and greek faces.
  */
 function trimFonts(): Plugin {
   return {
@@ -15,14 +15,7 @@ function trimFonts(): Plugin {
     enforce: 'pre',
     transform(code, id) {
       if (/@fontsource-variable\/.+\.css$/.test(id)) {
-        return code.replace(
-          /\/\*[^*]*-(?:cyrillic-ext|cyrillic|greek-ext|greek|vietnamese)-[^*]*\*\/\s*@font-face\s*\{[^}]*\}/g,
-          ''
-        );
-      }
-      // KaTeX lists woff2, woff and ttf for every face; every browser we target reads woff2
-      if (/katex(\.min)?\.css$/.test(id)) {
-        return code.replace(/,\s*url\([^)]*\.woff\)\s*format\("woff"\)/g, '').replace(/,\s*url\([^)]*\.ttf\)\s*format\("truetype"\)/g, '');
+        return code.replace(/\/\*[^*]*-(?:cyrillic-ext|cyrillic|greek-ext|vietnamese)-[^*]*\*\/\s*@font-face\s*\{[^}]*\}/g, '');
       }
       return null;
     },
@@ -57,21 +50,7 @@ export default defineConfig(({ mode }) => {
     },
     // pre-bundle everything up front so the dev server never re-optimises mid-session
     optimizeDeps: {
-      include: [
-        'react',
-        'react-dom',
-        'react-dom/client',
-        'react/jsx-runtime',
-        'motion/react',
-        'gsap',
-        'gsap/ScrollTrigger',
-        'gsap/SplitText',
-        '@gsap/react',
-        '@hugeicons/react',
-        '@hugeicons/core-free-icons',
-        'katex',
-        'ogl',
-      ],
+      include: ['react', 'react-dom', 'react-dom/client', 'react/jsx-runtime'],
     },
     server: { port: 5181 },
     build: single

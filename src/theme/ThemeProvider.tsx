@@ -30,7 +30,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     root.classList.add('theme-switching');
     root.classList.toggle('dark', theme === 'dark');
     root.style.colorScheme = theme;
-    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme === 'dark' ? '#0e1316' : '#faf8f4');
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme === 'dark' ? '#000000' : '#ffffff');
     const id = window.setTimeout(() => root.classList.remove('theme-switching'), 600);
     return () => window.clearTimeout(id);
   }, [theme]);
@@ -41,13 +41,3 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 }
 
 export const useTheme = () => useContext(Ctx);
-
-/** Read a CSS custom property off <html>; re-read whenever the theme changes. */
-export function useCssVar(name: string) {
-  const { theme } = useTheme();
-  const [v, setV] = useState(() => getComputedStyle(document.documentElement).getPropertyValue(name).trim());
-  useEffect(() => {
-    setV(getComputedStyle(document.documentElement).getPropertyValue(name).trim());
-  }, [theme, name]);
-  return v;
-}

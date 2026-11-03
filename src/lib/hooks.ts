@@ -1,54 +1,17 @@
-import { useContext, useEffect, useRef, useState, type RefObject } from 'react';
-import { PaneActive } from './pane';
+import { useEffect, useLayoutEffect, useState, type RefObject } from 'react';
 
-/** true while the element is (near) the viewport, and its tab pane, if any, is showing */
-export function useInView<T extends Element>(ref: RefObject<T | null>, rootMargin = '120px', once = false) {
-  const paneActive = useContext(PaneActive);
-  const [inView, setInView] = useState(false);
-  useEffect(() => {
+/** The element's width in CSS pixels, kept up to date (0 until it has been measured). Charts draw at this size. */
+export function useWidth<T extends HTMLElement>(ref: RefObject<T | null>) {
+  const [w, setW] = useState(0);
+  useLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
-    const io = new IntersectionObserver(
-      ([e]) => {
-        if (e.isIntersecting) {
-          setInView(true);
-          if (once) io.disconnect();
-        } else if (!once) setInView(false);
-      },
-      { rootMargin }
-    );
-    io.observe(el);
-    return () => io.disconnect();
-  }, [ref, rootMargin, once]);
-  return inView && paneActive;
-}
-
-/**
- * A clock in seconds that only runs while `running`. The frame delta is clamped at >= 0:
- * the first rAF timestamp can precede performance.now(), and a negative step breaks timelines.
- */
-export function useClock(running: boolean, speed = 1) {
-  const [t, setT] = useState(0);
-  const tRef = useRef(0);
-  useEffect(() => {
-    if (!running) return;
-    let raf = 0;
-    let last = performance.now();
-    const tick = (now: number) => {
-      const dt = Math.min(0.1, Math.max(0, (now - last) / 1000));
-      last = now;
-      tRef.current += dt * speed;
-      setT(tRef.current);
-      raf = requestAnimationFrame(tick);
-    };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [running, speed]);
-  const reset = (to = 0) => {
-    tRef.current = to;
-    setT(to);
-  };
-  return [t, reset] as const;
+    setW(Math.round(el.getBoundingClientRect().width));
+    const ro = new ResizeObserver(([e]) => setW(Math.round(e.contentRect.width)));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [ref]);
+  return w;
 }
 
 /** true on phone-width screens (below 640 px) */
@@ -75,15 +38,37 @@ export function useReducedMotion() {
   return r;
 }
 
-export const clamp = (x: number, a = 0, b = 1) => Math.min(b, Math.max(a, x));
-export const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
-/** smooth 0..1 progress of t through [start, start + dur] */
-export const seg = (t: number, start: number, dur: number) => {
-  const x = clamp((t - start) / dur);
-  return x * x * (3 - 2 * x);
-};
-export const easeOut = (x: number) => 1 - Math.pow(1 - clamp(x), 3);
-export const easeInOut = (x: number) => {
-  const c = clamp(x);
-  return c < 0.5 ? 4 * c * c * c : 1 - Math.pow(-2 * c + 2, 3) / 2;
-};
+/** Fade every `.rv` element up into place the first time it scrolls into view (once; none with reduced motion). */
+export function useReveal() {
+  useEffect(() => {
+    document.documentElement.classList.add('js');
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (!e.isIntersecting) continue;
+          e.target.classList.add('in');
+          io.unobserve(e.target);
+        }
+      },
+      { rootMargin: '0px 0px -6% 0px' }
+    );
+    document.querySelectorAll('.rv').forEach((el) => io.observe(el));
+    return () => io.disconnect();
+  }, []);
+}
+
+/** After the page has rendered, go to the section in the address (the layouts render after load, so the browser's own jump misses it). */
+export function useHashScroll() {
+  useEffect(() => {
+    const id = decodeURIComponent(location.hash.slice(1));
+    if (!id) return;
+    const go = () => document.getElementById(id)?.scrollIntoView({ block: 'start', behavior: 'instant' });
+    const raf = requestAnimationFrame(go);
+    // again once the charts have measured themselves and the fonts are in
+    const t = window.setTimeout(go, 450);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.clearTimeout(t);
+    };
+  }, []);
+}

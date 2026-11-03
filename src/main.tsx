@@ -1,19 +1,25 @@
 import { createRoot } from 'react-dom/client';
-import '@fontsource-variable/cormorant-garamond/wght.css';
-import '@fontsource-variable/cormorant-garamond/wght-italic.css';
-import '@fontsource-variable/literata/opsz.css';
-import '@fontsource-variable/literata/opsz-italic.css';
-import '@fontsource-variable/geist/wght.css';
-import '@fontsource-variable/geist-mono/wght.css';
-import 'katex/dist/katex.min.css';
+import type { ComponentType } from 'react';
+import '@fontsource-variable/inter/wght.css';
+import '@fontsource-variable/inter/wght-italic.css';
+import '@fontsource-variable/inter-tight/wght.css';
+import '@fontsource-variable/jetbrains-mono/wght.css';
 import './index.css';
 import { ThemeProvider } from './theme/ThemeProvider';
-import App from './App';
+import { chooseView, settleAfterSwitch, wantsPreview } from './phone/mode';
 
-createRoot(document.getElementById('root')!).render(
-  // no StrictMode: WebGL effects release their context on unmount, and the dev-only
-  // double mount would hand them a lost context
-  <ThemeProvider>
-    <App />
-  </ThemeProvider>
+// The desktop page and the phone layout are separate chunks: each device downloads only its own. A computer that
+// chose the phone layout gets it in a phone-sized frame.
+const view = chooseView();
+settleAfterSwitch();
+const preview = wantsPreview(view);
+document.documentElement.dataset.view = preview ? 'preview' : view;
+const root = createRoot(document.getElementById('root')!);
+const page: Promise<{ default: ComponentType }> = preview ? import('./phone/PhonePreview') : view === 'phone' ? import('./phone/PhoneApp') : import('./App');
+page.then(({ default: Page }) =>
+  root.render(
+    <ThemeProvider>
+      <Page />
+    </ThemeProvider>
+  )
 );
