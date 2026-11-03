@@ -100,7 +100,7 @@ export function Pay() {
                     caption={
                       <>
                         Test-set quality change <M>{'\\Delta V=\\mathbb E[V-Y_B]'}</M> in points with paired 95% intervals, and efficiency{' '}
-                        <M>{'\\eta/\\eta_B'}</M> against each testbed&rsquo;s reference. Hover a route for what it does.
+                        <M>{'\\eta/\\eta_B'}</M> against each testbed&rsquo;s reference; resources are dollars, or policy seconds for robots.
                       </>
                     }
                   >
