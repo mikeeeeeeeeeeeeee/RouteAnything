@@ -5,7 +5,7 @@ import { useTheme } from '@/theme/ThemeProvider';
 import { Gain, Hero, How, PaperBlock, Pay, Recover } from '@/site/sections';
 import { Close, Desktop, Menu, Moon, Sun } from '@/site/icons';
 import { COPY } from '@/site/copy';
-import { inFrame, switchView } from './mode';
+import { inFrame, switchView, watchWidening } from './mode';
 
 // The phone layout: the same sections and figures, stacked for one column; side-by-side cards become a row to
 // swipe. The bar keeps the title and the main link; its menu holds the sections, the theme and the desktop page.
@@ -79,6 +79,7 @@ export default function PhoneApp() {
   useEffect(() => {
     document.documentElement.classList.add('phone');
     if (inFrame()) document.documentElement.classList.add('framed');
+    return watchWidening();
   }, []);
   return (
     <>

@@ -73,6 +73,29 @@ export function currentSection(doc: Document = document, line = 120): string {
 export function switchView(v: View, anchor = currentSection()) {
   try {
     localStorage.setItem(KEY, v);
+  } catch {
+    /* private mode */
+  }
+  reload(anchor);
+}
+
+/** the layout was picked by the window's width alone: no remembered choice, not a phone, not the preview's frame */
+export function chosenByWidth(): boolean {
+  try {
+    if (localStorage.getItem(KEY)) return false;
+  } catch {
+    return false;
+  }
+  return !isPhoneDevice() && !inFrame();
+}
+
+let leaving = false;
+
+/** reload at the same section, into whichever layout the window now calls for */
+function reload(anchor: string) {
+  if (leaving) return;
+  leaving = true;
+  try {
     sessionStorage.setItem(SWITCHED, '1');
   } catch {
     /* private mode */
@@ -97,6 +120,23 @@ export function switchView(v: View, anchor = currentSection()) {
     w.history.replaceState(null, '', u.toString());
     w.location.reload();
   }, 230);
+}
+
+/**
+ * A computer's window that opened narrow and is then widened past 900 px shows the desktop page, without remembering a
+ * choice. The section is read on scroll, before the widening reflows the page under it. Returns the cleanup.
+ */
+export function watchWidening() {
+  if (!chosenByWidth()) return () => {};
+  let at = currentSection();
+  const scroll = () => (at = currentSection());
+  const resize = () => window.innerWidth >= 900 && reload(at);
+  window.addEventListener('scroll', scroll, { passive: true });
+  window.addEventListener('resize', resize);
+  return () => {
+    window.removeEventListener('scroll', scroll);
+    window.removeEventListener('resize', resize);
+  };
 }
 
 /** after a switch: start from the top (or the section's anchor), not from the old layout's scroll position */
