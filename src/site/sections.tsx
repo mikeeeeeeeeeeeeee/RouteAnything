@@ -232,6 +232,7 @@ export function PaperBlock() {
           <div className="btns rv" style={d(3)}>
             <Btn href={live(L.pdf)} label="Paper" solid />
             <Btn href={live(L.arxiv)} label="arXiv" />
+            <Btn href={live(L.hf)} label="Hugging Face" />
             <Btn href={L.code} label="Code" solid={!released} />
             <Btn href={L.data} label="Data" />
           </div>

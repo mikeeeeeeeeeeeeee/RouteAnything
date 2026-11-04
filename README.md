@@ -19,8 +19,8 @@ section being read. A computer that chooses the phone layout sees it in a phone-
 React 19 + Vite + Tailwind CSS v4 (for the reset and theme variables; the page's own styles are in `src/index.css`).
 
 **Paper links.** The paper is [arXiv 2611.05275](https://arxiv.org/abs/2611.05275), and the page follows its v1 text. `released` in
-`src/data/paper.ts` is `true`, so the Paper (PDF) and arXiv buttons link and the bar's main button opens the paper; Code and Data
-link to the public repository and the Hugging Face replay bundle. The arXiv cover's Project Page link points here.
+`src/data/paper.ts` is `true`, so the Paper (PDF), arXiv and Hugging Face (paper page) buttons link and the bar's main button opens
+the paper; Code and Data link to the public repository and the Hugging Face replay bundle. The arXiv cover's Project Page link points here.
 
 ## Run and build
 

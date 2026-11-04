@@ -13,6 +13,8 @@ export const paper = {
   links: {
     pdf: 'https://arxiv.org/pdf/2611.05275',
     arxiv: 'https://arxiv.org/abs/2611.05275',
+    /** the paper's Hugging Face page */
+    hf: 'https://huggingface.co/papers/2611.05275',
     code: 'https://github.com/InfRec-Cardinal/route-anything',
     data: 'https://huggingface.co/datasets/Lance1573/route-anything-data',
   },
