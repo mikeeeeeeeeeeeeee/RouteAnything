@@ -1,6 +1,8 @@
 import { useHashScroll, useReveal } from '@/lib/hooks';
 import { Nav } from '@/site/Nav';
 import { Gain, Hero, How, PaperBlock, Pay, Recover } from '@/site/sections';
+import { ApplySheet, TrySection } from '@/site/Apply';
+import { trial } from '@/data/trial';
 
 export default function App() {
   useReveal();
@@ -17,8 +19,10 @@ export default function App() {
         <Gain />
         <Recover />
         <Pay />
+        {trial.enabled && <TrySection />}
         <PaperBlock />
       </main>
+      {trial.enabled && <ApplySheet />}
     </>
   );
 }

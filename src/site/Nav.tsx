@@ -1,9 +1,10 @@
 import { paper, released } from '@/data/paper';
 import { useTheme } from '@/theme/ThemeProvider';
 import { switchView } from '@/phone/mode';
+import { trial } from '@/data/trial';
 import { Moon, Phone, Sun } from './icons';
 
-/** The desktop page's bar: a floating pill with the title, Cite, the paper (or the code until it is out), and two switches. */
+/** The desktop page's bar: a floating pill with the title, Cite, Try it, the paper (or the code until it is out), and two switches. */
 export function Nav() {
   const { theme, toggle } = useTheme();
   const main = released ? { href: paper.links.pdf, label: 'Paper' } : { href: paper.links.code, label: 'Code' };
@@ -15,6 +16,11 @@ export function Nav() {
       <a className="pill out" href="#cite">
         Cite
       </a>
+      {trial.enabled && (
+        <a className="pill out" href="#try">
+          Try it
+        </a>
+      )}
       <a className="pill solid" href={main.href} target="_blank" rel="noreferrer">
         {main.label}
       </a>

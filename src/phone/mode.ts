@@ -14,7 +14,7 @@ const KEY = 'ra-view';
 const SWITCHED = 'ra-view-switched';
 
 /** the sections both layouts share, in page order */
-export const SECTIONS = ['top', 'how', 'gain', 'recover', 'pay', 'cite'] as const;
+export const SECTIONS = ['top', 'how', 'gain', 'recover', 'pay', 'try', 'cite'] as const;
 
 /** a phone's browser, by what it says it is */
 export function isPhoneDevice(): boolean {

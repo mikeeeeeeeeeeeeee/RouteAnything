@@ -1275,3 +1275,424 @@ html.framed::-webkit-scrollbar {
   border-radius: 44px;
   background: var(--page);
 }
+
+/* ---------- the API trial ---------- */
+:root {
+  --bad: #d70015;
+  --bad-soft: rgba(215, 0, 21, 0.12);
+  --seg-on: #ffffff;
+  /* a raised surface (the form) and the fields on it */
+  --sheet: #ffffff;
+  --field: #ffffff;
+}
+.dark {
+  --bad: #ff453a;
+  --bad-soft: rgba(255, 69, 58, 0.18);
+  --seg-on: #636366;
+  --sheet: #1c1c1e;
+  --field: #2c2c2e;
+}
+.steps {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: minmax(0, 1fr);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+@media (min-width: 835px) {
+  .steps {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+.card.step {
+  padding: 30px 28px 28px;
+}
+.step-i {
+  display: block;
+  margin-bottom: 18px;
+  color: var(--blue);
+}
+.step-i svg {
+  display: block;
+  width: 28px;
+  height: 28px;
+}
+.step .card-note {
+  margin-top: 12px;
+}
+.try-cta {
+  margin-top: 44px;
+  text-align: center;
+}
+.cta.big {
+  margin: 0;
+  height: 52px;
+  padding: 0 30px;
+  font-size: 17px;
+}
+.try-cta p {
+  margin: 14px 0 0;
+  font-size: 14px;
+  color: var(--ink3);
+}
+.cta[disabled] {
+  opacity: 0.6;
+  cursor: default;
+}
+.paper:not(.band) + .site-foot {
+  border-top: 1px solid var(--hair);
+}
+.phone .card.step {
+  padding: 24px 22px 22px;
+}
+
+/* the form: a sheet over the page */
+.ap-veil {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  background: rgba(0, 0, 0, 0.32);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+.dark .ap-veil {
+  background: rgba(0, 0, 0, 0.6);
+}
+.ap-veil.on {
+  opacity: 1;
+  pointer-events: auto;
+}
+.ap {
+  position: fixed;
+  inset: 0;
+  z-index: 71;
+  display: grid;
+  place-items: center;
+  padding: 24px 16px;
+  pointer-events: none;
+}
+.ap-card {
+  position: relative;
+  width: min(680px, 100%);
+  max-height: calc(100dvh - 48px);
+  overflow: auto;
+  overscroll-behavior: contain;
+  border-radius: 28px;
+  background: var(--sheet);
+  box-shadow: var(--ring), 0 30px 80px rgba(0, 0, 0, 0.22);
+  opacity: 0;
+  transform: translateY(18px) scale(0.985);
+  visibility: hidden;
+  transition: opacity 0.3s var(--ease), transform 0.36s var(--ease), visibility 0s linear 0.36s;
+}
+.ap.on .ap-card {
+  opacity: 1;
+  transform: none;
+  visibility: visible;
+  pointer-events: auto;
+  transition: opacity 0.3s var(--ease), transform 0.36s var(--ease);
+}
+.ap-head {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 26px 22px 10px 32px;
+  background: var(--sheet);
+}
+.ap-k {
+  margin: 0 0 6px;
+  font: 600 13px/1.3 var(--text);
+  color: var(--ink2);
+}
+.ap-head h2 {
+  margin: 0;
+  font: 600 30px/1.1 var(--display);
+  letter-spacing: -0.012em;
+}
+.ap-form {
+  padding: 0 32px 28px;
+}
+.ap-sub {
+  margin: 0 0 24px;
+  font-size: 15px;
+  color: var(--ink2);
+}
+.ap-grid {
+  display: grid;
+  gap: 20px 16px;
+  grid-template-columns: minmax(0, 1fr);
+}
+@media (min-width: 600px) {
+  .ap-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .ap-grid .f.wide {
+    grid-column: 1 / -1;
+  }
+}
+.f-l {
+  display: block;
+  margin: 0 0 8px;
+  font: 600 14px/1.3 var(--text);
+  color: var(--ink);
+}
+.f-opt {
+  margin-left: 6px;
+  font-weight: 400;
+  font-size: 12px;
+  color: var(--ink3);
+}
+.ap input:not([type='checkbox']),
+.ap textarea {
+  display: block;
+  width: 100%;
+  height: 46px;
+  padding: 0 14px;
+  border: 1px solid var(--hair);
+  border-radius: 12px;
+  background: var(--field);
+  color: var(--ink);
+  font: 400 16px/1.3 var(--text);
+  letter-spacing: -0.005em;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.ap textarea {
+  height: auto;
+  min-height: 112px;
+  padding: 12px 14px;
+  line-height: 1.45;
+  resize: vertical;
+}
+.ap input::placeholder,
+.ap textarea::placeholder {
+  color: var(--ink3);
+}
+.ap input:not([type='checkbox']):focus,
+.ap textarea:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 4px var(--blue-soft);
+}
+.f.bad input:not([type='checkbox']),
+.f.bad textarea {
+  border-color: var(--bad);
+}
+.f.bad input:not([type='checkbox']):focus,
+.f.bad textarea:focus {
+  box-shadow: 0 0 0 4px var(--bad-soft);
+}
+.f-h,
+.f-e {
+  margin: 7px 0 0;
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: var(--ink3);
+}
+.f-e {
+  color: var(--bad);
+}
+.seg {
+  display: flex;
+  gap: 3px;
+  padding: 3px;
+  border-radius: 12px;
+  background: var(--fill);
+}
+.f.bad .seg {
+  box-shadow: inset 0 0 0 1px var(--bad);
+}
+.seg button {
+  flex: 1;
+  min-height: 38px;
+  padding: 4px 8px;
+  border-radius: 9px;
+  font-size: 14px;
+  line-height: 1.2;
+  color: var(--ink);
+  transition: background-color 0.2s, box-shadow 0.2s;
+}
+.seg button.on {
+  background: var(--seg-on);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), var(--ring);
+  font-weight: 600;
+}
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.chips button {
+  height: 34px;
+  padding: 0 14px;
+  border: 1px solid var(--hair);
+  border-radius: 999px;
+  font-size: 14px;
+  color: var(--ink);
+  transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+}
+.chips button.on {
+  border-color: var(--blue);
+  background: var(--blue-soft);
+  color: var(--blue);
+}
+.agree {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--ink2);
+  cursor: pointer;
+}
+.agree input {
+  position: absolute;
+  opacity: 0;
+  width: 22px;
+  height: 22px;
+  margin: 0;
+}
+.agree .box {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  margin-top: -1px;
+  border: 1.5px solid var(--hair);
+  border-radius: 7px;
+  background: var(--field);
+  color: transparent;
+  transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+}
+.agree input:checked + .box {
+  border-color: var(--blue);
+  background: var(--blue);
+  color: #fff;
+}
+.agree input:focus-visible + .box {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+}
+.f.bad .agree .box {
+  border-color: var(--bad);
+}
+.hp {
+  position: absolute !important;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+.ap-fail {
+  margin: 18px 0 0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--bad-soft);
+  font-size: 14px;
+  color: var(--bad);
+}
+.ap-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-top: 26px;
+  padding-top: 20px;
+  border-top: 1px solid var(--hair);
+}
+.ap-foot p {
+  margin: 0;
+  max-width: 38ch;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--ink3);
+}
+.ap-foot .cta {
+  margin: 0;
+}
+.ap-done {
+  padding: 10px 32px 36px;
+  text-align: center;
+}
+.ap-tick {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  margin: 10px auto 20px;
+  border-radius: 64px;
+  background: var(--blue);
+  color: #fff;
+}
+.ap-done-t {
+  margin: 0 auto;
+  max-width: 30ch;
+  font-size: 19px;
+  line-height: 1.4;
+  color: var(--ink);
+}
+.ap-done-t b {
+  font-weight: 600;
+}
+.ap-done-n {
+  margin: 10px 0 0;
+  font-size: 14px;
+  color: var(--ink3);
+}
+.ap-done .btn {
+  margin-top: 26px;
+}
+/* on a phone the form is a sheet from the bottom, and Send stays in reach */
+@media (max-width: 734px) {
+  .ap {
+    place-items: end stretch;
+    padding: 0;
+  }
+  .ap-card {
+    width: 100%;
+    max-height: calc(100dvh - 36px);
+    border-radius: 28px 28px 0 0;
+    transform: translateY(100%);
+  }
+  .ap-head {
+    padding: 22px 14px 8px 22px;
+  }
+  .ap-head h2 {
+    font-size: 26px;
+  }
+  .ap-form {
+    padding: 0 22px 0;
+  }
+  .seg button {
+    font-size: 13px;
+  }
+  .ap-foot {
+    position: sticky;
+    bottom: 0;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    margin-top: 22px;
+    padding: 14px 0 calc(14px + env(safe-area-inset-bottom));
+    background: var(--sheet);
+  }
+  .ap-foot p {
+    max-width: none;
+    text-align: center;
+  }
+  .ap-foot .cta {
+    width: 100%;
+  }
+  .ap-done {
+    padding: 6px 22px calc(32px + env(safe-area-inset-bottom));
+  }
+}

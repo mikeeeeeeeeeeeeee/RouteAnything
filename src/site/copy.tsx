@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { FORECAST, HEADROOM_ALL, JUDGE, MATRIX, NEAR_ZERO_MEAN, OBJECTIVES, PRICE_FACTS, ROBOT, ROUTERS, ROUTERS_ALL } from '@/data/results';
+import { trial } from '@/data/trial';
 
 // Every sentence on the page, shared by the desktop and the phone layouts. Numbers come from the data file where
 // one exists; the rest are quoted from the paper (arXiv 2611.05275v1).
@@ -189,6 +190,37 @@ export const COPY = {
         them: { v: `${FORECAST.llmCostAttempts}×`, c: 'DeepSeek-v4-pro forecast at list price' },
       },
     ] as StatRow[],
+  },
+
+  trial: {
+    eyebrow: 'Try it',
+    h: ['Route your own inputs.', 'Request an API key.'],
+    lede: (
+      <>
+        We are opening <b>a small number of API keys</b> to our 4B router. Tell us who you are and what you would route; we review every request
+        and email a key to the ones we approve.
+      </>
+    ),
+    steps: [
+      { h: 'Apply', note: 'Your name, affiliation and what you plan to route. About two minutes.' },
+      { h: 'We review', note: `We read every request and reply by email ${trial.reply}.` },
+      { h: 'Get a key', note: 'A personal key with a trial quota, and how to call the router.' },
+    ],
+    cta: 'Request an API key',
+    fine: 'Keys are limited and for research and evaluation only.',
+    form: {
+      k: 'Route Anything · API trial',
+      title: 'Request an API key',
+      sub: 'For our 4B router. We read every request.',
+      emailHint: 'We send the key here. Work email preferred.',
+      linkHint: 'Helps us review your request sooner.',
+      useHint: 'The tasks, and the models or policies you would route between.',
+      usePlaceholder: 'For example: routing coding questions between three open models and one API model, to cut cost at the same pass rate.',
+      agree: 'I will use the key for research or evaluation only, keep it to myself, and accept that it can be revoked.',
+      privacy: 'We use these details only to review your request and to contact you about it.',
+      doneTitle: 'Request sent',
+      doneNote: 'If our reply doesn’t arrive, check your spam folder.',
+    },
   },
 
   paper: {

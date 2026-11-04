@@ -6,6 +6,7 @@ import { HeadroomShare } from '@/charts/gain';
 import { RobotChart, ROBOT_KEY, RouterGainChart } from '@/charts/recover';
 import { FloorWaffles } from '@/charts/pay';
 import { affiliations, authors, bibtex, live, paper, released, thread } from '@/data/paper';
+import { trial } from '@/data/trial';
 import logoDark from '@/assets/brand/infrec-dark.webp';
 import logoLight from '@/assets/brand/infrec-light.webp';
 import { useTheme } from '@/theme/ThemeProvider';
@@ -201,7 +202,8 @@ export function PaperBlock() {
   const L = paper.links;
   return (
     <>
-      <section id="cite" className="sec band paper">
+      {/* the trial section above it is a band, so the paper's is not */}
+      <section id="cite" className={`sec paper${trial.enabled ? '' : ' band'}`}>
         <div className="wrap-mid">
           <p className="eyebrow rv">{COPY.paper.eyebrow}</p>
           <h2 className="rv" style={d(1)}>

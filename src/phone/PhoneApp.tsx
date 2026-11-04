@@ -5,6 +5,8 @@ import { useTheme } from '@/theme/ThemeProvider';
 import { Gain, Hero, How, PaperBlock, Pay, Recover } from '@/site/sections';
 import { Close, Desktop, Menu, Moon, Sun } from '@/site/icons';
 import { COPY } from '@/site/copy';
+import { ApplySheet, TrySection } from '@/site/Apply';
+import { trial } from '@/data/trial';
 import { inFrame, switchView, watchWidening } from './mode';
 
 // The phone layout: the same sections and figures, stacked for one column; side-by-side cards become a row to
@@ -15,6 +17,7 @@ const STOPS = [
   { id: 'gain', label: COPY.gain.eyebrow },
   { id: 'recover', label: COPY.recover.eyebrow },
   { id: 'pay', label: COPY.pay.eyebrow },
+  ...(trial.enabled ? [{ id: 'try', label: 'Try the router' }] : []),
   { id: 'cite', label: 'Paper and BibTeX' },
 ];
 
@@ -90,8 +93,10 @@ export default function PhoneApp() {
         <Gain />
         <Recover />
         <Pay />
+        {trial.enabled && <TrySection />}
         <PaperBlock />
       </main>
+      {trial.enabled && <ApplySheet />}
       <p className="to-desktop">
         <button type="button" onClick={() => switchView('desktop', 'top')}>
           <Desktop />
