@@ -8,7 +8,8 @@ A short, minimal page in the manner of [rlvr-pirl.vercel.app](https://rlvr-pirl.
 everything else, Inter Tight headlines and Inter text. Each section is one question, a two-line answer, a short paragraph and
 one figure; every figure is a plain SVG chart with a tooltip on hover (a tap on a touch screen). It runs from the hero (headroom
 and efficiency, the paper's Figure 1) through how it works (the setting and four drawings of Theorem 2 and Propositions 3–5),
-how much routing can gain, what learned routers recover and when routing pays through price, to the paper and its BibTeX.
+the paper's three questions (can a router beat the best fixed candidate, how well do learned routers work, when is a cheaper
+route good enough), to the paper and its BibTeX.
 Light by default, with a plain dark theme.
 
 **Phone layout.** A phone gets its own layout (`src/phone/`), chosen by the browser's user agent or a window narrower than
@@ -17,10 +18,9 @@ section being read. A computer that chooses the phone layout sees it in a phone-
 
 React 19 + Vite + Tailwind CSS v4 (for the reset and theme variables; the page's own styles are in `src/index.css`).
 
-**Paper links.** The paper is not on arXiv yet: `released` in `src/data/paper.ts` is `false`, so the Paper and arXiv buttons read
-"soon" and the bar's main button links to the code. Code and Data link to the public repository and the Hugging Face replay
-bundle. When the paper is posted, fill in `links.pdf` and `links.arxiv`, set `released = true`, replace the BibTeX placeholder
-`2610.xxxxx`, and push.
+**Paper links.** The paper is [arXiv 2611.05275](https://arxiv.org/abs/2611.05275), and the page follows its v1 text. `released` in
+`src/data/paper.ts` is `true`, so the Paper (PDF) and arXiv buttons link and the bar's main button opens the paper; Code and Data
+link to the public repository and the Hugging Face replay bundle. The arXiv cover's Project Page link points here.
 
 ## Run and build
 
@@ -43,7 +43,7 @@ address differs. Any static host works too: upload the contents of `dist/`.
 | What | File |
 | --- | --- |
 | Title, authors, date, abstract, BibTeX, **links** and the `released` switch | `src/data/paper.ts` |
-| Every number on the page (Tables 1–17, Figs. 1, 3, 4 and the text of the 2026-11-03 paper) | `src/data/results.ts` |
+| Every number on the page (Tables 1–15, Figs. 1, 3, 4 and the text of arXiv 2611.05275v1) | `src/data/results.ts` |
 | Every sentence on the page, shared by both layouts | `src/site/copy.tsx` |
 | Sections, shared by both layouts | `src/site/sections.tsx` |
 | Charts | `src/charts/*.tsx` |

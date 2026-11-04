@@ -1,8 +1,8 @@
 import { ROBOT, ROUTER_ROBOT, ROUTERS, ROUTERS_ALL, type RouterRow } from '@/data/results';
-import { ChartBox, ci, fmt, lin, signed, useHover, vbar, hbar } from './base';
+import { ChartBox, ci, fmt, hbar, lin, signed, useHover, vbar } from './base';
 
-// Table 3: the share of the headroom one learned router captures, per output group; and Figure 4: robot success
-// by scene condition, where the router follows whichever policy is better.
+// Table 3: how far one learned router lands above the best fixed candidate, per modality; and Figure 4: robot
+// success by scene condition, where the router follows whichever policy is better.
 
 const SHORT: Record<string, string> = {
   text: 'Text QA',
@@ -14,14 +14,17 @@ const SHORT: Record<string, string> = {
   robot: 'Robots',
 };
 
-const SHARE_ROWS: (RouterRow & { total?: boolean; sep?: boolean })[] = [...ROUTERS, { ...ROUTERS_ALL, total: true, sep: true }, { ...ROUTER_ROBOT }];
+const GAIN_ROWS: (RouterRow & { total?: boolean; sep?: boolean })[] = [...ROUTERS, { ...ROUTERS_ALL, total: true, sep: true }, { ...ROUTER_ROBOT }];
 
-export function RouterShareChart() {
+/** a change in points with a true minus sign, and no sign at zero */
+const pts = (v: number) => (v === 0 ? '0.00' : signed(v, 2));
+
+export function RouterGainChart() {
   const { hot, tip, bind } = useHover();
   return (
     <ChartBox
-      label="Share of the headroom a learned router captures: text QA minus 3%, code and agents 14%, image generation 5%, video generation 12%, speech generation 0%, all 16 benchmarks 6%, robots 6%."
-      height={(W) => 4 + SHARE_ROWS.length * (W < 420 ? 30 : 32) + 14 + 26}
+      label="A learned router's score minus the best fixed candidate's, in points: text QA −0.17, code and agents +0.77, image generation +0.25, video generation +2.12, speech generation 0.00; all 16 benchmarks +0.30; robots +1.10."
+      height={(W) => 4 + GAIN_ROWS.length * (W < 420 ? 30 : 32) + 14 + 26}
       hot={hot}
       tip={tip}
       draw={(W) => {
@@ -29,10 +32,10 @@ export function RouterShareChart() {
         const rh = narrow ? 30 : 32;
         const labelW = narrow ? 112 : 128;
         const x0 = labelW + 14;
-        const x1 = W - 44;
-        const X = lin(-0.1, 1, x0, x1);
+        const x1 = W - 52;
+        const X = lin(-0.5, 2.5, x0, x1);
         let y = 4;
-        const ys = SHARE_ROWS.map((r) => {
+        const ys = GAIN_ROWS.map((r) => {
           if (r.sep) y += 14;
           const c = y + rh / 2;
           y += rh;
@@ -41,33 +44,33 @@ export function RouterShareChart() {
         const bottom = y + 4;
         return (
           <>
-            {[0, 0.25, 0.5, 0.75, 1].map((t) => (
+            {[0, 1, 2].map((t) => (
               <g key={t}>
                 <line className={t === 0 ? 'zero' : 'grid'} x1={X(t)} x2={X(t)} y1={0} y2={bottom} />
                 <text className="tick" x={X(t)} y={bottom + 18} textAnchor="middle">
-                  {Math.round(t * 100)}%
+                  {t === 0 ? '0' : `+${t}`}
                 </text>
               </g>
             ))}
             <line x1={0} x2={W} y1={ys[ROUTERS.length] - rh / 2 - 7} y2={ys[ROUTERS.length] - rh / 2 - 7} stroke="var(--hair)" shapeRendering="crispEdges" />
-            {SHARE_ROWS.map((r, i) => {
+            {GAIN_ROWS.map((r, i) => {
               const cy = ys[i];
-              const neg = r.share < 0;
+              const neg = r.diff < 0;
               return (
                 <g key={r.key} className={`row${hot === i ? ' on' : ''}`}>
                   <text className={`lbl${r.total ? ' b' : ''}`} x={labelW} y={cy + 4.5} textAnchor="end" style={{ fontSize: narrow ? 13 : 14 }}>
                     {SHORT[r.key]}
                   </text>
-                  {r.share !== 0 &&
-                    (neg ? (
-                      <path d={`M${X(0)},${cy - 6}H${X(r.share) + 4}Q${X(r.share)},${cy - 6} ${X(r.share)},${cy - 2}V${cy + 2}Q${X(r.share)},${cy + 6} ${X(r.share) + 4},${cy + 6}H${X(0)}Z`} fill="var(--c-a)" />
-                    ) : (
-                      <path d={hbar(X(0), X(r.share), cy, 12)} fill="var(--blue)" />
-                    ))}
-                  {r.share === 0 && <circle cx={X(0)} cy={cy} r={3} fill="var(--c-a)" />}
+                  {r.diff > 0 && <path d={hbar(X(0), X(r.diff), cy, 12)} fill="var(--blue)" />}
+                  {neg && (
+                    <path
+                      d={`M${X(0)},${cy - 6}H${X(r.diff) + 4}Q${X(r.diff)},${cy - 6} ${X(r.diff)},${cy - 2}V${cy + 2}Q${X(r.diff)},${cy + 6} ${X(r.diff) + 4},${cy + 6}H${X(0)}Z`}
+                      fill="var(--c-a)"
+                    />
+                  )}
+                  {r.diff === 0 && <circle cx={X(0)} cy={cy} r={3} fill="var(--c-a)" />}
                   <text className={`val ${r.total ? 'blue' : 'ink'}`} x={W} y={cy + 4.5} textAnchor="end">
-                    {r.share < 0 ? '−' : ''}
-                    {Math.round(Math.abs(r.share) * 100)}%
+                    {pts(r.diff)}
                   </text>
                   <rect
                     className="hit"
@@ -76,15 +79,15 @@ export function RouterShareChart() {
                     width={W}
                     height={rh}
                     {...bind(i, () => ({
-                      x: Math.max(X(0), X(r.share)),
+                      x: Math.max(X(0), X(r.diff)),
                       y: cy,
-                      title: `${r.label}${r.key === 'robot' ? '' : r.total ? '' : ` (${r.benchmarks})`}`,
+                      title: `${r.label}${r.key === 'robot' || r.total ? '' : ` (${r.benchmarks})`}`,
                       rows: [
-                        { mark: 'hollow', color: 'var(--c-a)', label: 'the fixed candidate', value: r.fixed.toFixed(2) },
+                        { mark: 'hollow', color: 'var(--c-a)', label: 'the best fixed candidate', value: r.fixed.toFixed(2) },
                         { mark: 'bar', color: 'var(--blue)', label: 'the learned router', value: r.router.toFixed(2) },
                         { mark: 'dot', color: 'var(--c-a)', label: 'the per-input oracle', value: r.oracle.toFixed(2) },
                       ],
-                      note: `${r.inputs.toLocaleString('en-US')} test inputs · router − fixed ${signed(r.diff, 2)}${r.ci ? ` ${ci(r.ci)}` : ''}`,
+                      note: `${r.inputs.toLocaleString('en-US')} test inputs · router − fixed ${pts(r.diff)}${r.ci ? ` ${ci(r.ci)}` : ''} · ${r.share < 0 ? '−' : ''}${Math.round(Math.abs(r.share) * 100)}% of the gap to the oracle`,
                     }))}
                   />
                 </g>

@@ -48,7 +48,7 @@ export function HeadroomShare() {
   const { hot, tip, bind } = useHover();
   return (
     <ChartBox
-      label="Share of the headroom the best lookup recovers: 0.4% per benchmark, 8% per capability type, 23% per robot task and scene; the rest lies within types."
+      label="Share of the potential gain the best lookup recovers: 0.4% per benchmark, 8% per capability type, 23% per robot task and scene; the rest lies within types."
       height={(W) => (W < 520 ? 3 * 82 - 10 : 3 * 92 - 14)}
       hot={hot}
       tip={tip}

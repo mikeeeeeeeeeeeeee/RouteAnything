@@ -1,6 +1,7 @@
 // Numbers transcribed from the paper (Route Anything: A Study of Model and Policy Routing for General-Purpose
-// AI Systems, 2026-11-03 PDF; its body matches the 11-03 source). Each block names its source. Tables 1–5
-// are in the body (1 headroom, 2 panels), 6–9 in Appendix B (the matrix), 10–17 in Appendix C (code and text).
+// AI Systems, arXiv 2611.05275v1). Each block names its source. Tables 1–5 are in the body (1 potential gain,
+// 2 panels), 6–9 in Appendix B (the matrix), 10–15 in Appendix C (code and text). "Headroom" in the names below
+// is the paper's "potential gain".
 
 /* ================================================================== */
 /* The omni-modal matrix (§3, Appendix B)                             */
@@ -194,7 +195,7 @@ export const ROUTERS: RouterRow[] = [
   { key: 'speech', label: 'Speech generation', group: 'speech', benchmarks: 2, inputs: 617, fixed: 98.63, router: 98.63, oracle: 99.3, diff: 0, share: 0 },
 ];
 
-export const ROUTERS_ALL: RouterRow = { key: 'all', label: 'All 16 benchmarks', benchmarks: 16, inputs: 3444, fixed: 79.68, router: 79.98, oracle: 84.8, diff: 0.3, share: 0.06, ci: [0.0, 0.62] };
+export const ROUTERS_ALL: RouterRow = { key: 'all', label: 'All 16 benchmarks', benchmarks: 16, inputs: 3444, fixed: 79.68, router: 79.98, oracle: 84.8, diff: 0.3, share: 0.06 };
 
 export const ROUTER_ROBOT: RouterRow = {
   key: 'robot',
@@ -363,6 +364,10 @@ export const PRICE_ROUTES: PriceRouteRow[] = [
   { key: 'img-2', group: 'image', testbed: 'Image generation', resource: '$', reference: 'Fixed generator', route: 'Fitted, ε = 2', kind: 'fitted', dv: -1.56, ci: [-2.39, -0.73], eff: 2.03 },
   { key: 'robot', group: 'robot', testbed: 'Robot manipulation', resource: 's', reference: 'Fixed policy', route: 'Outcome router', kind: 'router', dv: 1.1, ci: [-0.4, 2.55], eff: 1.33 },
 ];
+
+/** Finding 6: the four near-zero-loss routes (images at ε = 0.5) and their mean efficiency, the paper's 8.82× */
+export const NEAR_ZERO_KEYS = ['code-fit', 'text-fit', 'img-05', 'robot'] as const;
+export const NEAR_ZERO_MEAN = NEAR_ZERO_KEYS.reduce((a, k) => a + PRICE_ROUTES.find((r) => r.key === k)!.eff, 0) / NEAR_ZERO_KEYS.length;
 
 /** Table 9: the half-point image route, test quality (0–100) and m$ per image */
 export const IMAGE_ROUTE = [
@@ -541,35 +546,17 @@ export const PORTFOLIO_EXAMPLE = {
 };
 
 /* ------------------------------------------------------------------ */
-/* Finding 7 · retries (App. C.4, Table 14)                            */
+/* Finding 7 · retries (§5.2)                                          */
 /* ------------------------------------------------------------------ */
 
 export const CHAINS = {
-  chains: 259,
   orderedPairs: 42,
+  /** the second model's success after the first fails, as a share of its success otherwise (θ = 1) */
   medianRatio: 0.49,
-  decided: 57405,
-  agreement: [
-    { label: 'Planning on post-failure states', value: 93.2, ours: true },
-    { label: 'Planning on marginal success rates', value: 77.2 },
-  ],
-  tokens: { first: 523, retry1: 1276, retry2: 2101 },
 };
 
-export const RETRIES = [
-  { model: 'DeepSeek-flash', failures: 52, fresh: 0.263, feedback: 0.327, diff: [0.064, -0.05, 0.18] },
-  { model: 'DeepSeek-v4-pro', failures: 34, fresh: 0.157, feedback: 0.363, diff: [0.206, 0.061, 0.365] },
-  { model: 'Kimi-K2.5', failures: 35, fresh: 0.105, feedback: 0.219, diff: [0.114, -0.01, 0.241] },
-  { model: 'Qwen3-Max', failures: 31, fresh: 0.032, feedback: 0.28, diff: [0.247, 0.102, 0.407] },
-  { model: 'Qwen3.5-Plus', failures: 29, fresh: 0.069, feedback: 0.218, diff: [0.149, -0.021, 0.333] },
-  { model: 'GLM-5', failures: 28, fresh: 0.071, feedback: 0.262, diff: [0.19, 0.051, 0.358] },
-  { model: 'MiniMax-M2.7', failures: 54, fresh: 0.29, feedback: 0.383, diff: [0.093, -0.012, 0.194] },
-] as const;
-
-export const RETRY_POOLED = { failures: 263, tasks: 282, fresh: 0.165, feedback: 0.304, diff: [0.139, 0.058, 0.223] as [number, number, number] };
-
 /* ------------------------------------------------------------------ */
-/* Finding 7 · verifiers (App. C.5, Table 15)                          */
+/* Finding 7 · verifiers (App. C.4, Table 14)                          */
 /* ------------------------------------------------------------------ */
 
 export interface VerifierRow {
@@ -599,7 +586,7 @@ export const JUDGE = {
 };
 
 /* ------------------------------------------------------------------ */
-/* Finding 7 · routing signals (App. C.6, Table 16)                    */
+/* Finding 7 · routing signals (App. C.5, Table 15)                    */
 /* ------------------------------------------------------------------ */
 
 export const SIGNALS = [
@@ -625,19 +612,13 @@ export const FORECAST = {
 };
 
 /* ------------------------------------------------------------------ */
-/* Finding 7 · router memory (App. C.7, Table 17)                      */
+/* Finding 7 · router memory (App. C.6)                                */
 /* ------------------------------------------------------------------ */
 
 export const MEMORY = {
-  priors: [
-    { prior: 'Always-Opus', predicted: 0.304, realized: [0.275, 0.272, 0.279] as [number, number, number] },
-    { prior: 'DimensionBest', predicted: -0.148, realized: [-0.12, -0.126, -0.113] as [number, number, number] },
-  ],
   storeEff: 135.8,
   belowOpus: 0.034,
   belowDimBest: 0.116,
-  signAgreement: { right: 918, of: 969 },
-  alwaysImprove: { right: 646, of: 969 },
   cells: 12,
   probing: 2044,
   test: 867,
@@ -648,7 +629,7 @@ export const MEMORY = {
 };
 
 /* ------------------------------------------------------------------ */
-/* Overheads (App. C.5)                                                */
+/* Overheads (App. C.4)                                                */
 /* ------------------------------------------------------------------ */
 
 export const OVERHEADS = [

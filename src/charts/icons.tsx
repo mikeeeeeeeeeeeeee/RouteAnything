@@ -1,4 +1,4 @@
-// Line pictograms shared by the routing diagrams: one per output type (the candidate pools) and one per
+// Line pictograms shared by the routing diagrams: one per modality (the candidate pools) and one per
 // kind of input a router reads. Each is drawn centred on (x, y) in a box of about 18 × 18.
 
 export type Pool = 'language' | 'image' | 'video' | 'speech' | 'robot';
@@ -13,7 +13,7 @@ const stroke = (color: string, width = 1.5) => ({
   
 });
 
-/** a small line pictogram for each output type, drawn inside a candidate's node */
+/** a small line pictogram for each modality, drawn inside a candidate's node */
 export function PoolIcon({ pool, x, y, color }: { pool: Pool; x: number; y: number; color: string }) {
   const common = stroke(color);
   return (

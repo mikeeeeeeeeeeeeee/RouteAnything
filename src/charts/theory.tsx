@@ -125,7 +125,7 @@ export function EnvelopeMini() {
 }
 
 /* ------------------------------------------------------------------ */
-/* Proposition 3: the headroom ladder                                   */
+/* Proposition 3: the information ladder                                */
 /* ------------------------------------------------------------------ */
 
 const RUNGS = [

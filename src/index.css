@@ -341,6 +341,7 @@ li {
 /* ---------- hero ---------- */
 .hero {
   padding-top: 118px;
+  padding-bottom: 64px;
   text-align: center;
 }
 .hero-title {
@@ -360,7 +361,7 @@ li {
 }
 .buy {
   margin: 32px auto 0;
-  width: min(600px, 100%);
+  width: min(780px, 100%);
   display: flex;
   align-items: center;
   gap: 16px;
@@ -402,9 +403,23 @@ li {
   margin-top: 22px;
   font-size: 17px;
 }
+/* a longer summary: the button goes under the text on a phone */
+@media (max-width: 734px) {
+  .buy {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 20px 20px 20px 22px;
+    border-radius: 24px;
+  }
+  .buy .cta {
+    margin-left: 0;
+  }
+}
 @media (min-width: 735px) {
   .hero {
     padding-top: 124px;
+    padding-bottom: 80px;
   }
   .hero-title {
     font-size: 64px;

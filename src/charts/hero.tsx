@@ -1,7 +1,7 @@
 import { HEADROOM, HEADROOM_ALL, PRICE_ROUTES, groupLabel, type GroupKey } from '@/data/results';
 import { ChartBox, ci, hbar, lin, log, signed, useHover } from './base';
 
-// The paper's Figure 1 (b) and (c): per-input headroom by output type, and the efficiency of price routes at a
+// The paper's Figure 1 (b) and (c): per-input potential gain by modality, and the efficiency of price routes at a
 // near-zero quality loss. Both panels share one row grid so they stand at the same height side by side.
 
 const SHORT: Record<GroupKey, string> = {
@@ -30,7 +30,7 @@ export function HeroHeadroom() {
   const { hot, tip, bind } = useHover();
   return (
     <ChartBox
-      label="Per-input headroom by output type: the best fixed candidate per benchmark against the per-input oracle, on a 0 to 100 scale."
+      label="Per-input potential gain by modality: the best fixed candidate per benchmark against the per-input oracle, on a 0 to 100 scale."
       height={heroH}
       hot={hot}
       tip={tip}

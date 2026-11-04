@@ -3,7 +3,7 @@ import { HeroEfficiency, HeroHeadroom } from '@/charts/hero';
 import { RouterDiagram } from '@/charts/router';
 import { CertifyMini, EnvelopeMini, LadderMini, WinnerMini } from '@/charts/theory';
 import { HeadroomShare } from '@/charts/gain';
-import { RobotChart, ROBOT_KEY, RouterShareChart } from '@/charts/recover';
+import { RobotChart, ROBOT_KEY, RouterGainChart } from '@/charts/recover';
 import { FloorWaffles } from '@/charts/pay';
 import { affiliations, authors, bibtex, live, paper, released, thread } from '@/data/paper';
 import logoDark from '@/assets/brand/infrec-dark.webp';
@@ -114,9 +114,9 @@ export function Recover() {
       <StoryHead eyebrow={c.eyebrow} h={c.h} lede={c.lede} />
       <div className="wrap-mid stage grid-2">
         <figure className="card fig rv">
-          <FigHead t={c.share.t} sub={c.share.sub} />
-          <RouterShareChart />
-          <figcaption className="cap">{c.share.cap}</figcaption>
+          <FigHead t={c.beat.t} sub={c.beat.sub} />
+          <RouterGainChart />
+          <figcaption className="cap">{c.beat.cap}</figcaption>
         </figure>
         <figure className="card fig rv" style={d(1)}>
           <FigHead t={c.robot.t} sub={c.robot.sub} />

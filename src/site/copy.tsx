@@ -1,12 +1,15 @@
 import type { ReactNode } from 'react';
-import { HEADROOM_ALL, JUDGE, MATRIX, MEMORY, OBJECTIVES, PRICE_FACTS, RETRY_POOLED, ROBOT, ROUTERS_ALL } from '@/data/results';
+import { FORECAST, HEADROOM_ALL, JUDGE, MATRIX, NEAR_ZERO_MEAN, OBJECTIVES, PRICE_FACTS, ROBOT, ROUTERS, ROUTERS_ALL } from '@/data/results';
 
 // Every sentence on the page, shared by the desktop and the phone layouts. Numbers come from the data file where
-// one exists; the rest are quoted from the paper (2026-11-03).
+// one exists; the rest are quoted from the paper (arXiv 2611.05275v1).
 
 const v = (s: string) => <i className="var">{s}</i>;
 const pct = (x: number) => `${Math.round(x * 100)}%`;
 const n = (x: number) => x.toLocaleString('en-US');
+/** routing's mean efficiency over the reference across the four testbeds: 8.82× */
+const mean = `${NEAR_ZERO_MEAN.toFixed(2)}×`;
+const video = ROUTERS.find((r) => r.key === 'video')!;
 
 export interface StatRow {
   k: string;
@@ -18,18 +21,18 @@ export interface StatRow {
 export const COPY = {
   hero: {
     sub: 'One router for language models, image, video and speech generators, and robot policies.',
-    buy: 'The best candidate per input beats the best fixed one by 5.4 points.',
-    buy2: 'Near-zero-loss routes are 25.5× as efficient on code.',
+    buy: 'A potential path to AGI could be a router.',
+    buy2: `Route Anything brings routing to text, images, video, speech, code, and robots, delivering ${mean} average relative efficiency across four settings and exceeding the performance of the best fixed model in diverse domains.`,
     thread: 'The research thread',
     panels: [
-      { t: 'Headroom per input, by output type' },
+      { t: 'Potential gain per input, by modality' },
       { t: 'Efficiency at near-zero quality loss', key: 'Price route, against the testbed’s reference' },
     ],
   },
 
   how: {
     eyebrow: 'How it works',
-    h: ['One rule.', 'Every output type.'],
+    h: ['One rule.', 'Every modality.'],
     lede: (
       <>
         A router observes a state and plays the candidate with <b>the highest value minus priced cost</b>. When no price is given, a reference
@@ -97,35 +100,39 @@ export const COPY = {
   },
 
   gain: {
-    eyebrow: 'How much can routing gain?',
-    h: ['The headroom is large.', 'It lives inside task types.'],
+    eyebrow: 'Can a router beat the best fixed candidate?',
+    h: ['The potential gain is large.', 'It lies within task types.'],
     lede: (
       <>
-        On {n(HEADROOM_ALL.inputs)} held-out inputs from {HEADROOM_ALL.benchmarks} benchmarks, the best candidate per input beats the best fixed
+        On {n(HEADROOM_ALL.inputs)} test inputs from {HEADROOM_ALL.benchmarks} benchmarks, the best candidate per input beats the best fixed
         candidate per benchmark by <b>5.4 points</b>, from 0.7 for speech generation to 18–19 for video generation and robot manipulation. A
         lookup by capability type, even chosen in hindsight, closes only <b>8%</b> of the gap.
       </>
     ),
     fig: {
-      t: 'Where the headroom lies',
+      t: 'Where the potential gain lies',
       sub: 'Share of the gap from the best fixed candidate to the per-input oracle that the best lookup recovers, chosen in hindsight.',
       cap: 'Inside a type, outcomes vary input by input. On GenEval2, per-prompt differences between generators have a standard deviation of 31–38 points against mean differences of 4–14.',
     },
   },
 
   recover: {
-    eyebrow: 'What do learned routers recover?',
-    h: ['Routers capture 6%.', 'On robots, they read the scene.'],
+    eyebrow: 'How well do learned routers work?',
+    h: ['Routers beat the best fixed candidate.', 'On robots, they read the scene.'],
     lede: (
       <>
-        One router over {ROUTERS_ALL.benchmarks} benchmarks scores {ROUTERS_ALL.router}, against {ROUTERS_ALL.fixed} for the fixed candidate and{' '}
-        {ROUTERS_ALL.oracle.toFixed(2)} for the oracle: <b>{pct(ROUTERS_ALL.share)} of the headroom</b>. From three camera frames, a router sends
-        clean scenes to PatchWAM and randomized ones to ME-Dex, matching the better policy with <b>{pct(ROBOT.seconds.saving)} less policy time</b>.
+        One router over {ROUTERS_ALL.benchmarks} benchmarks scores {ROUTERS_ALL.router}, against {ROUTERS_ALL.fixed} for the best fixed candidate:{' '}
+        <b>{ROUTERS_ALL.diff.toFixed(1)} points</b> ahead, and <b>{video.diff.toFixed(1)}</b> on video generation. From three camera frames, a
+        router sends clean scenes to PatchWAM and randomized ones to ME-Dex, and beats the best single policy by{' '}
+        <b>
+          {ROBOT.overall.diff.toFixed(1)} points with {pct(ROBOT.seconds.saving)} less policy time
+        </b>
+        .
       </>
     ),
-    share: {
-      t: 'Headroom a learned router captures',
-      sub: 'Router gain over the fixed candidate, as a share of the oracle’s. Test inputs, one training seed.',
+    beat: {
+      t: 'A learned router against the best fixed candidate',
+      sub: 'Router score minus the fixed candidate’s, in points, by modality. Test inputs, one training seed.',
       cap: 'The router departs from the fixed candidate only where candidates complement each other input by input, as on Terminal-Bench (+8.3 points) and VBench-2.0 (+2.1).',
     },
     robot: {
@@ -150,31 +157,25 @@ export const COPY = {
   },
 
   pay: {
-    eyebrow: 'When does routing pay through price?',
-    h: ['Routing pays most', 'through price.'],
+    eyebrow: 'When is a cheaper route good enough?',
+    h: ['A cheaper route is', 'often good enough.'],
     lede: (
       <>
-        Where candidates differ more in price than in value, near-zero-loss routes raise efficiency <b>25.5×</b> on code and <b>7.1×</b> on text
-        QA. Fitted on half of the data, the zero-loss floor holds on test in only 12.5% of 200 splits; certified on the other half, in{' '}
-        <b>all 200</b>.
+        Where candidates are close in quality and far apart in cost, routing raises efficiency over the reference by <b>{mean}</b> on average
+        across four testbeds, including <b>25.5×</b> on code and <b>7.1×</b> on text QA. Fitted on half of the data, the zero-loss floor holds on
+        test in only 12.5% of 200 splits; certified on the other half, in <b>all 200</b>.
       </>
     ),
     fig: {
       t: 'A floor that holds on new inputs',
       sub: 'The zero-loss floor on CodeRouterBench, refitted on 200 random halves of the probing tasks. One square per split, filled where the floor holds on test.',
-      cap: `Most of the 25.5× on code is the reference’s price: always calling the cheapest model reaches ${PRICE_FACTS.code.qwenAlways.eff}× at a ${PRICE_FACTS.code.qwenAlways.loss}-point loss, and routing by state recovers that loss.`,
+      cap: `Always calling the cheapest model already reaches ${PRICE_FACTS.code.qwenAlways.eff}× at a ${PRICE_FACTS.code.qwenAlways.loss}-point loss; routing by state recovers that loss and adds ${pct(PRICE_FACTS.code.stateGain)} efficiency.`,
     },
     spend: {
       k: 'Spending more within a task',
-      h: 'Richer candidates pay only against what they replace.',
+      h: 'Richer candidates are worth their cost only if they beat what they replace.',
     },
     rows: [
-      {
-        k: 'Retries',
-        note: 'Per-retry recovery after a failure, across seven models.',
-        us: { v: RETRY_POOLED.feedback.toFixed(3).replace(/^0/, ''), c: 'With the failing tests as feedback' },
-        them: { v: RETRY_POOLED.fresh.toFixed(3).replace(/^0/, ''), c: 'Fresh retry' },
-      },
       {
         k: 'Verifiers',
         note: 'Dollar efficiency of a Qwen3-Max cascade, verifier included.',
@@ -182,16 +183,16 @@ export const COPY = {
         them: { v: `${JUDGE.list.toFixed(2)}×`, c: 'LLM judge at list price' },
       },
       {
-        k: 'Memory',
-        note: 'Gain per round of one record store, in value minus priced cost.',
-        us: { v: `+${MEMORY.priors[0].realized[0].toFixed(3)}`, c: 'Over always-Opus' },
-        them: { v: `−${Math.abs(MEMORY.priors[1].realized[0]).toFixed(3)}`, c: 'Over a per-dimension best-model prior' },
+        k: 'Routing signals',
+        note: 'Cost per task, against one Qwen3-Max call. A forecast can save at most the attempt it replaces.',
+        us: { v: `${(FORECAST.tfidfCost * 100).toFixed(2)}%`, c: 'Prompt-only TF-IDF router' },
+        them: { v: `${FORECAST.llmCostAttempts}×`, c: 'DeepSeek-v4-pro forecast at list price' },
       },
     ] as StatRow[],
   },
 
   paper: {
-    eyebrow: 'Technical report · November 2026',
+    eyebrow: 'Preprint · November 2026',
     foot: 'Figures are redrawn from the paper’s tables and figures; the four small drawings under How it works illustrate the statements with made-up numbers. The omni-modal matrix itself is not released.',
   },
 };
