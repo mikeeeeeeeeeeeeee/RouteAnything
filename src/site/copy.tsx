@@ -101,7 +101,7 @@ export const COPY = {
 
   gain: {
     eyebrow: 'Can a router beat the best fixed candidate?',
-    h: ['The potential gain is large.', 'It lies within task types.'],
+    h: ['The potential gain is large.'],
     lede: (
       <>
         On {n(HEADROOM_ALL.inputs)} test inputs from {HEADROOM_ALL.benchmarks} benchmarks, the best candidate per input beats the best fixed

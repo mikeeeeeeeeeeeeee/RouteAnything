@@ -10,8 +10,14 @@ export function StoryHead({ eyebrow, h, lede }: { eyebrow: string; h: string[]; 
     <header className="story-head wrap-copy">
       <p className="eyebrow rv">{eyebrow}</p>
       <h2 className="hx rv" style={d(1)}>
-        {h[0]} <br className="br" />
-        {h[1]}
+        {h[0]}
+        {h[1] && (
+          <>
+            {' '}
+            <br className="br" />
+            {h[1]}
+          </>
+        )}
       </h2>
       {lede && (
         <p className="lede rv" style={d(2)}>
