@@ -2,7 +2,7 @@ import { useEffect, useId, useRef, useState, useSyncExternalStore, type FormEven
 import { paper } from '@/data/paper';
 import { trial } from '@/data/trial';
 import { COPY } from './copy';
-import { Close } from './icons';
+import { Chevron, Close } from './icons';
 import { d, StoryHead } from './ui';
 
 // The API trial: a section that says what an applicant gets and how, and one application form in a sheet. The
@@ -128,38 +128,122 @@ function check(v: Draft): Errors {
   if (v.link.trim() && !/^(https?:\/\/)?[^\s.]+\.[^\s]{2,}/.test(v.link.trim())) e.link = 'Enter a web address, or leave this empty.';
   if (v.use.trim().length < MIN_USE) e.use = `A sentence or two, please (at least ${MIN_USE} characters).`;
   if (!v.volume) e.volume = 'Choose one.';
-  if (!v.agree) e.agree = 'Please agree to the terms of the trial.';
+  if (!v.agree) e.agree = 'Please agree to the trial terms.';
   return e;
 }
 
 type Sent = { state: 'idle' } | { state: 'sending' } | { state: 'done'; email: string } | { state: 'failed'; reason: string };
 
-async function send(v: Draft): Promise<void> {
-  if (v.botcheck) return; // a bot: pretend it worked
-  if (!trial.endpoint) {
-    // a preview on the dev server shows the whole flow; a build without an endpoint must not pretend to send
-    if (import.meta.env.DEV) return new Promise((r) => setTimeout(r, 700));
-    throw new Error('The form is not connected yet.');
-  }
-  const body = {
-    ...(trial.accessKey ? { access_key: trial.accessKey } : {}),
-    subject: `${paper.title} API request: ${v.name.trim()} (${v.affiliation.trim()})`,
-    from_name: `${paper.title} page`,
+/** the request as the team's email shows it: one readable line per answer, the applicant as reply-to */
+function message(v: Draft, page = location.href.split('#')[0]) {
+  const given = (x: string) => x || '(not given)';
+  return {
+    access_key: trial.accessKey,
+    subject: `[${paper.title} API] ${v.name.trim()}, ${v.affiliation.trim()}`,
+    from_name: `${paper.title} API trial`,
     replyto: v.email.trim(),
-    name: v.name.trim(),
-    email: v.email.trim(),
-    affiliation: v.affiliation.trim(),
-    role: v.role,
-    homepage: v.link.trim(),
-    use: v.use.trim(),
-    modalities: v.modalities.join(', '),
-    volume: v.volume,
-    agreed: 'yes',
-    page: location.href.split('#')[0],
-    botcheck: '',
+    Name: v.name.trim(),
+    Email: v.email.trim(),
+    Affiliation: v.affiliation.trim(),
+    Role: v.role,
+    'Homepage, Scholar or GitHub': given(v.link.trim()),
+    'What they will route': v.use.trim(),
+    Modalities: given(v.modalities.join(', ')),
+    'Calls in the first month': v.volume,
+    'Trial terms': `Agreed (version of ${trial.termsDate})`,
+    'Sent from': page,
   };
-  const r = await fetch(trial.endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify(body) });
-  if (!r.ok) throw new Error(`The form service answered ${r.status}.`);
+}
+
+/** the same request as plain text, for the email fallback */
+function plain(v: Draft) {
+  const { access_key: _k, subject: _s, from_name: _f, replyto: _r, ...fields } = message(v);
+  return [`${paper.title} API request`, '', ...Object.entries(fields).map(([k, x]) => `${k}: ${x}`)].join('\n');
+}
+
+const UNREACHABLE = 'our form service can’t be reached from your network';
+
+async function send(v: Draft): Promise<void> {
+  if (v.botcheck) return; // a bot filled the hidden field: pretend it worked, send nothing
+  // the dev server shows the whole flow without emailing anyone: ?send=1 sends from it for real, ?fail=1 fails
+  if (import.meta.env.DEV) {
+    const q = new URLSearchParams(location.search);
+    if (q.has('fail')) return new Promise((_, no) => setTimeout(() => no(new Error(UNREACHABLE)), 500));
+    if (!q.has('send')) return new Promise((r) => setTimeout(r, 700));
+  }
+  if (!trial.endpoint || !trial.accessKey) throw new Error('the form is not connected yet');
+  let r: Response;
+  try {
+    r = await fetch(trial.endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify(message(v)) });
+  } catch {
+    // a blocked or failed connection, or Cloudflare's challenge page, which carries no CORS headers
+    throw new Error(UNREACHABLE);
+  }
+  const data: { success?: boolean; message?: string; body?: { message?: string } } | null = await r.json().catch(() => null);
+  if (!r.ok || data?.success === false) {
+    const why = data?.message ?? data?.body?.message;
+    throw new Error(r.status === 429 ? 'too many requests from this network; wait a few minutes' : why ? why.replace(/[.!]+$/, '') : `the form service answered ${r.status}`);
+  }
+}
+
+/** When sending fails: the same request by email, answers filled in, or copied to paste anywhere. */
+function Fallback({ v, reason }: { v: Draft; reason: string }) {
+  const [copied, setCopied] = useState(false);
+  const to = trial.fallbackEmail;
+  const subject = message(v).subject;
+  const text = plain(v);
+  const copy = () =>
+    navigator.clipboard?.writeText(`To: ${to}\nSubject: ${subject}\n\n${text}`).then(() => {
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1800);
+    });
+  if (!to)
+    return (
+      <p className="ap-fail" role="alert">
+        We couldn’t send your request ({reason}). Please try again in a few minutes.
+      </p>
+    );
+  return (
+    <div className="ap-fail" role="alert">
+      <p>
+        We couldn’t send your request: {reason}. Email it to us instead, at <b>{to}</b>. Your answers are already filled in.
+      </p>
+      <div className="ap-fail-btns">
+        <a className="btn solid" href={`mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(text)}`}>
+          Open in your mail app
+        </a>
+        <button type="button" className="btn" onClick={copy}>
+          {copied ? 'Copied' : 'Copy your answers'}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/** the terms, folded under the agreement so the form stays short */
+function Terms({ id }: { id: string }) {
+  const [open, setOpen] = useState(false);
+  const t = COPY.trial.terms;
+  return (
+    <div className={`terms${open ? ' open' : ''}`}>
+      <button type="button" className="terms-btn" aria-expanded={open} aria-controls={id} onClick={() => setOpen((o) => !o)}>
+        {open ? 'Hide the trial terms' : 'Read the trial terms'}
+        <Chevron />
+      </button>
+      <div id={id} className="terms-body" hidden={!open}>
+        <p className="terms-t">{t.title}</p>
+        <dl>
+          {t.items.map((it) => (
+            <div key={it.k}>
+              <dt>{it.k}</dt>
+              <dd>{it.t}</dd>
+            </div>
+          ))}
+        </dl>
+        <p className="terms-date">{t.date}</p>
+      </div>
+    </div>
+  );
 }
 
 function Field({ id, label, hint, error, wide, children }: { id: string; label: ReactNode; hint?: ReactNode; error?: string; wide?: boolean; children: ReactNode }) {
@@ -440,6 +524,7 @@ export function ApplySheet() {
                   )}
                 </div>
                 <div className={`f wide${errors.agree ? ' bad' : ''}`}>
+                  <Terms id={id('terms')} />
                   <label className="agree">
                     <input type="checkbox" data-f="agree" checked={v.agree} onChange={(e) => put('agree', e.target.checked)} aria-invalid={!!errors.agree} />
                     <span className="box" aria-hidden>
@@ -458,17 +543,7 @@ export function ApplySheet() {
                 {/* bots fill every field; people never see this one */}
                 <input className="hp" tabIndex={-1} autoComplete="off" aria-hidden value={v.botcheck} onChange={(e) => put('botcheck', e.target.value)} name="botcheck" />
               </div>
-              {sent.state === 'failed' && (
-                <p className="ap-fail" role="alert">
-                  We couldn’t send your request ({sent.reason}). Please try again
-                  {trial.fallbackEmail ? (
-                    <>
-                      , or email <a href={`mailto:${trial.fallbackEmail}`}>{trial.fallbackEmail}</a>
-                    </>
-                  ) : null}
-                  .
-                </p>
-              )}
+              {sent.state === 'failed' && <Fallback v={v} reason={sent.reason} />}
               <footer className="ap-foot">
                 <p>{f.privacy}</p>
                 <button type="submit" className="cta" disabled={sent.state === 'sending'}>

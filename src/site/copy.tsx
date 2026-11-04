@@ -204,10 +204,10 @@ export const COPY = {
     steps: [
       { h: 'Apply', note: 'Your name, affiliation and what you plan to route. About two minutes.' },
       { h: 'We review', note: `We read every request and reply by email ${trial.reply}.` },
-      { h: 'Get a key', note: 'A personal key with a trial quota, and how to call the router.' },
+      { h: 'Get a key', note: 'A personal key with its quota and validity, and how to call the router.' },
     ],
     cta: 'Request an API key',
-    fine: 'Keys are limited and for research and evaluation only.',
+    fine: 'Keys are limited and for research and evaluation. Quotas and validity will be announced.',
     form: {
       k: 'Route Anything · API trial',
       title: 'Request an API key',
@@ -216,10 +216,35 @@ export const COPY = {
       linkHint: 'Helps us review your request sooner.',
       useHint: 'The tasks, and the models or policies you would route between.',
       usePlaceholder: 'For example: routing coding questions between three open models and one API model, to cut cost at the same pass rate.',
-      agree: 'I will use the key for research or evaluation only, keep it to myself, and accept that it can be revoked.',
+      agree: 'I have read and agree to the trial terms.',
       privacy: 'We use these details only to review your request and to contact you about it.',
       doneTitle: 'Request sent',
-      doneNote: 'If our reply doesn’t arrive, check your spam folder.',
+      doneNote: 'Our reply comes from an @infrec.tech address. If it doesn’t arrive, check your spam folder.',
+    },
+    /** the terms an applicant agrees to; each key's details are set in its approval email */
+    terms: {
+      title: 'Trial terms',
+      date: `Last updated ${trial.termsDate}.`,
+      items: [
+        {
+          k: 'Review',
+          t: 'We read every request by hand. Whether to grant a key, and its quota and validity, are up to us; the details of each key are in its approval email. We may ask for more information or decline without giving a reason.',
+        },
+        { k: 'Use', t: 'Keys are for research and evaluation, including non-commercial prototypes. Commercial or production use needs our written agreement.' },
+        {
+          k: 'Your key',
+          t: 'A key is for you alone: don’t share, publish or commit it. If it leaks, tell us and we will replace it. We can limit, suspend or revoke a key at any time, for example after misuse or when the trial ends.',
+        },
+        {
+          k: 'Not allowed',
+          t: 'Using the API to break the law or infringe others’ rights, to produce harmful content, to probe or overload the service, or to copy the router, for example by training a model on its choices.',
+        },
+        { k: 'What you send', t: 'We may log calls to the API, including what you send, to run the trial, enforce quotas and improve the router. Don’t send personal or confidential data.' },
+        { k: 'No guarantees', t: 'The trial is provided as is. It may be slow or unavailable, and it may change or end at any time.' },
+        { k: 'This form', t: 'We use these details only to review your request and to contact you about the trial. The form reaches us by email through Web3Forms.' },
+        { k: 'Changes', t: 'We may update these terms. The version you agreed to is sent with your request.' },
+        { k: 'Credit', t: 'If you publish work that uses the router, please cite the paper.' },
+      ],
     },
   },
 

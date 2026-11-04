@@ -1594,11 +1594,34 @@ html.framed::-webkit-scrollbar {
 }
 .ap-fail {
   margin: 18px 0 0;
-  padding: 12px 14px;
-  border-radius: 12px;
-  background: var(--bad-soft);
+  padding: 16px 18px;
+  border-radius: 16px;
+  background: var(--band);
+  box-shadow: inset 3px 0 0 var(--blue);
   font-size: 14px;
-  color: var(--bad);
+  line-height: 1.5;
+  color: var(--ink2);
+}
+.ap-fail p {
+  margin: 0;
+}
+.ap-fail b {
+  font-weight: 600;
+  color: var(--ink);
+  -webkit-user-select: all;
+  user-select: all;
+}
+.ap-fail-btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+.ap-fail-btns .btn {
+  height: 40px;
+  min-width: 0;
+  padding: 0 18px;
+  font-size: 15px;
 }
 .ap-foot {
   display: flex;
@@ -1651,6 +1674,66 @@ html.framed::-webkit-scrollbar {
 .ap-done .btn {
   margin-top: 26px;
 }
+/* the trial terms, folded above the agreement */
+.terms {
+  margin: 0 0 14px;
+}
+.terms-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+  color: var(--blue);
+}
+.terms-btn svg {
+  transition: transform 0.25s var(--ease);
+}
+.terms.open .terms-btn svg {
+  transform: rotate(90deg);
+}
+.terms-body {
+  margin-top: 12px;
+  padding: 18px 20px 16px;
+  border-radius: 16px;
+  background: var(--band);
+}
+.terms-t {
+  margin: 0 0 12px;
+  font: 600 15px/1.3 var(--text);
+  color: var(--ink);
+}
+.terms-body dl {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+}
+.terms-body dl > div {
+  display: grid;
+  grid-template-columns: 118px minmax(0, 1fr);
+  gap: 12px;
+}
+.terms-body dt {
+  font: 600 13px/1.45 var(--text);
+  color: var(--ink);
+}
+.terms-body dd {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--ink2);
+}
+.terms-date {
+  margin: 14px 0 0;
+  font-size: 12px;
+  color: var(--ink3);
+}
+@media (max-width: 599px) {
+  .terms-body dl > div {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2px;
+  }
+}
+
 /* on a phone the form is a sheet from the bottom, and Send stays in reach */
 @media (max-width: 734px) {
   .ap {

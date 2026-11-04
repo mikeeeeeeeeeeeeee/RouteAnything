@@ -22,6 +22,22 @@ React 19 + Vite + Tailwind CSS v4 (for the reset and theme variables; the page's
 `src/data/paper.ts` is `true`, so the Paper (PDF), arXiv and Hugging Face (paper page) buttons link and the bar's main button opens
 the paper; Code and Data link to the public repository and the Hugging Face replay bundle. The arXiv cover's Project Page link points here.
 
+## API trial
+
+A Try it section (between the findings and the paper, also in the bar and the phone menu) offers a few API keys to the 4B
+router. Applicants fill in one form in a sheet; `#apply` at the end of the address opens it directly, so
+`https://mikeeeeeeeeeeeeee.github.io/RouteAnything/#apply` is the link to hand out. The form agrees to the trial terms
+(`COPY.trial.terms` in `src/site/copy.tsx`).
+
+- **Where requests go.** The form posts to Web3Forms (form "RedBird"), which emails each request to the form's inbox with the
+  applicant as reply-to: answering is replying. The inbox is set in the Web3Forms dashboard, not in this repository.
+- **Mainland China.** Web3Forms sits behind Cloudflare, which stops requests from mainland China. When sending fails, the
+  form offers to send the same request by email to `fallbackEmail`, answers filled in, or to copy them.
+- **Settings** are in `src/data/trial.ts`: `enabled`, the access key (public by design), `fallbackEmail`, the reply time the
+  page promises, and the date of the terms.
+- **Testing.** The dev server never sends: add `?send=1` to send from it for real, or `?fail=1` to see the email fallback.
+  A built page always sends.
+
 ## Run and build
 
 ```bash
